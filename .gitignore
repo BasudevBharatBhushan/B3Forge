@@ -1,0 +1,17 @@
+# Knowledge graph output — rebuild locally with the /graphify skill or `graphify update .`
+graphify-out/
+
+# Scratch space
+temp/
+tmp/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
