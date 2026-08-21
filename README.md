@@ -69,6 +69,7 @@ bin/cli.js                           The npx scaffolder. Copies this tree into a
     database.md                      DB safety, migration review flow, data corrections
     timezone.md                      Client-supplied-timezone policy
     graphify.md                      Knowledge-graph setup and tool reference
+    karpathy.md                      Behavioral checklist — assumptions, simplicity, surgical diffs
   workflows/
     workflow.md                      Full workflow reference with rationale
     test.md                          The explicit test trigger
