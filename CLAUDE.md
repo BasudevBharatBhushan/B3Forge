@@ -374,6 +374,7 @@ Do **not** preload these. Fetch by scope, when the task actually needs them.
 | `.agents/rules/database.md` | DB changes involved |
 | `.agents/rules/timezone.md` | date/time logic involved |
 | `.agents/rules/graphify.md` | graph setup or advanced queries |
+| `.agents/rules/karpathy.md` | behavioral checklist before a large or ambiguous change |
 | `.agents/rules/rules.md` | auditing or extending the rules |
 | `.agents/workflows/workflow.md` | auditing or extending the workflow |
 | `ai-workspace/docs/db-architecture.md` | schema work |
