@@ -4,16 +4,29 @@ Roughly 20 minutes, most of it the graph build.
 
 ---
 
-## 1. Copy the files in
+## 1. Scaffold the files in
+
+From your project root:
+
+```bash
+npx agentic-development-template
+```
+
+This writes `CLAUDE.md`, `.agents/`, `.claude/skills/`, and `ai-workspace/`, merges the
+graphify MCP server into `.mcp.json`, and appends `graphify-out/`, `temp/`, `tmp/` to
+`.gitignore`. Use `--dry-run` first if you want to see it before it writes.
+
+Nothing existing is overwritten. If your project already has a `CLAUDE.md`, it is left
+untouched and the template is written beside it as `CLAUDE.agentic.md` — merge its §0–§12
+in as your workflow section, keep your own project context, then delete it.
+
+Prefer to copy by hand:
 
 ```bash
 git clone https://github.com/KiBiz-Systems/agentic-development-template.git
 cd agentic-development-template
-cp -r CLAUDE.md LESSONS.md .agents ai-workspace /path/to/your-project/
+cp -r CLAUDE.md LESSONS.md .agents .claude ai-workspace /path/to/your-project/
 ```
-
-If your project already has a `CLAUDE.md`, merge rather than overwrite: keep your
-project-specific context, and take this file's §0–§12 as the workflow section.
 
 ---
 
@@ -45,9 +58,19 @@ these by name, so nothing works until it's accurate.
 Discovery is graph-first and required. Full detail: `.agents/rules/graphify.md`.
 
 ```bash
+uv tool install graphifyy          # or: pip install graphifyy
 graphify --help                    # confirm the CLI resolves
-graphify install --platform claude # install the skill for your agent platform
 ```
+
+`npx agentic-development-template` already wrote the MCP server into `.mcp.json` and
+installed the `/graphify` skill if the CLI was on PATH. Restart Claude Code so it picks the
+server up, and approve it when prompted. If you installed graphify afterwards, re-run the
+scaffolder with `--force` so `.mcp.json` points at the right interpreter.
+
+> Do **not** run `graphify claude install`. It injects its own graph-discovery section into
+> `CLAUDE.md` plus a PreToolUse hook, which duplicates §4 of the manual — two copies of one
+> rule is exactly the drift `LESSONS.md` warns about. The MCP server and the skill are what
+> you want; the CLAUDE.md section is already here.
 
 Then invoke the `/graphify` skill on the repo to build the initial graph. It produces
 `graphify-out/graph.json`, an interactive `graph.html`, and `GRAPH_REPORT.md`.

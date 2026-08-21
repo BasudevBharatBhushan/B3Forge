@@ -25,10 +25,24 @@ looser version of it failed. `LESSONS.md` records exactly how.
 
 ## Adopt it
 
+From your project root:
+
 ```bash
-git clone https://github.com/KiBiz-Systems/agentic-development-template.git
-cp -r agentic-development-template/{CLAUDE.md,LESSONS.md,.agents,ai-workspace} your-project/
+npx agentic-development-template
 ```
+
+That writes `CLAUDE.md`, `.agents/`, `.claude/skills/`, and `ai-workspace/`, adds the
+graphify MCP server to `.mcp.json`, and appends `graphify-out/` to `.gitignore`. Existing
+files are never overwritten — an existing `CLAUDE.md` is left alone and the template lands
+beside it as `CLAUDE.agentic.md` to merge. Re-running is safe.
+
+| Flag | |
+|---|---|
+| `--dry-run` | report what would happen, write nothing |
+| `--force` | overwrite existing files |
+| `--no-mcp` | skip the `.mcp.json` entry |
+| `--no-skill` | skip installing the graphify skill |
+| `--graph-path <p>` | non-default `graph.json` location |
 
 Then fill in the **§0 Project Configuration** table at the top of `CLAUDE.md` — the
 typecheck, lint, and test commands, your repo topology, and your scope types. That table is
@@ -44,6 +58,7 @@ Full checklist, including Graphify setup: **`SETUP.md`**.
 CLAUDE.md                            The complete spec. Loaded every session. Start here.
 LESSONS.md                           What went wrong in production to produce each rule.
 SETUP.md                             Adoption checklist for a new project.
+bin/cli.js                           The npx scaffolder. Copies this tree into a project.
 
 .agents/
   rules/
@@ -60,6 +75,12 @@ SETUP.md                             Adoption checklist for a new project.
   templates/
     TICKET_TEMPLATE.md               The one file a task produces
     AGENTS_MD_TEMPLATE.md            Per-module AI quick-reference
+
+.claude/
+  skills/                            Task runbooks, invoked by name. Auto-discovered
+    testing/                         /testing — the explicit test trigger
+    refactor/                        /refactor — behavior-preserving restructuring
+    ui-responsiveness/               /ui-responsiveness — viewport audit and fixes
 
 ai-workspace/
   active-ticket                      ≤5-line pointer. Overwritten, never appended

@@ -381,6 +381,21 @@ Do **not** preload these. Fetch by scope, when the task actually needs them.
 
 If a required doc is missing, stop and request clarification.
 
+### Skills
+
+Task-shaped runbooks in `.claude/skills/`, invoked by name. They do not replace anything
+above — each one carries out this workflow for a particular kind of task, and names the rule
+doc that governs it.
+
+| Skill | Invoke for |
+|-------|-----------|
+| `/testing` | The explicit request to run tests — the trigger §7 refers to |
+| `/refactor` | Behavior-preserving restructuring: extract, split, rename, de-duplicate |
+| `/ui-responsiveness` | Auditing and fixing UI behavior across viewport sizes |
+
+Skills are auto-discovered from `.claude/skills/<name>/SKILL.md`. Adding one needs no
+registration anywhere — but a skill that contradicts this file is wrong, not authoritative.
+
 ---
 
 ## 12. Why These Rules Exist

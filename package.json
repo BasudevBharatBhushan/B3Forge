@@ -1,0 +1,34 @@
+{
+  "name": "agentic-development-template",
+  "version": "0.1.0",
+  "description": "Drop-in agentic development workflow — ticket-driven, subagentic, graph-first. Scaffolds CLAUDE.md, rules, skills, and the graphify MCP server into a project.",
+  "bin": {
+    "agentic-init": "bin/cli.js"
+  },
+  "files": [
+    "bin",
+    ".agents",
+    ".claude",
+    "ai-workspace",
+    "CLAUDE.md",
+    "LESSONS.md",
+    "SETUP.md"
+  ],
+  "engines": {
+    "node": ">=16"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "agentic",
+    "ai-workflow",
+    "mcp",
+    "graphify",
+    "scaffold"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KiBiz-Systems/agentic-development-template.git"
+  }
+}
