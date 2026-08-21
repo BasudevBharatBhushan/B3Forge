@@ -28,7 +28,7 @@ looser version of it failed. `LESSONS.md` records exactly how.
 From your project root:
 
 ```bash
-npx agentic-development-template
+npx github:KiBiz-Systems/agentic-development-template
 ```
 
 That writes `CLAUDE.md`, `.agents/`, `.claude/skills/`, and `ai-workspace/`, adds the
