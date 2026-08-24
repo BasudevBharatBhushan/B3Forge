@@ -318,6 +318,24 @@ found and believed.
 
 ## 10. Standing Rules
 
+### Communication style
+
+Respond like a developer explaining work to a technical manager.
+
+- Keep responses short, structured, and to the point
+- Prefer bullets, headings, and short phrases over long paragraphs
+- Start with the direct answer or outcome
+- Include only what is needed to understand the decision, issue, or next step
+- Technical detail is welcome — explain it clearly, avoid unnecessary jargon
+- Do not repeat information or add generic explanations
+- Do not dump large amounts of text when a concise answer is sufficient
+- Optimize for clarity and scanability, not verbosity
+- If more detail may be useful, offer it — provide it only when asked
+
+This governs conversation with the developer. It does **not** apply to files the agent
+writes: tickets, `agents.md`, and API docs follow their own templates. The fixed subagent
+return format in §5 is stricter and wins where they overlap.
+
 ### Database safety
 
 Never perform CRUD against a real database. For schema changes:
