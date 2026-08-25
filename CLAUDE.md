@@ -1,21 +1,16 @@
 # Agent Operating Manual
 
-This file is loaded into every session. It is the **complete** specification of how agentic
-development works in this project. Everything below is binding.
-
-Deeper reference docs live in `.agents/` — load them only when auditing or extending the
-rules themselves, never as routine context.
-
-**Design goal: minimum token consumption with full context.** One artifact per task, cheap
-models writing, an expensive model only judging. Every rule here traces back to that.
+Loaded every session. Binding. **Design goal: minimum tokens, full context** — one artifact
+per task, cheap models writing, an expensive model only judging. Expansions live in `.agents/`
+(§11), loaded on demand only. `LESSONS.md` holds the production failure behind each rule.
 
 ---
 
 ## 0. Project Configuration — FILL THIS IN FIRST
 
-This template is stack-agnostic. The rules below refer to these commands by name; a new
-project makes them concrete here, once. Until this table is filled in, the agent must ask
-rather than guess.
+The rules below refer to these by name. Until filled in, **ask rather than guess.** Never
+infer a command from convention — run it once, record what it actually does. `NONE` is a valid
+value and a planning constraint, not something to invent around.
 
 | Key | Value |
 |-----|-------|
@@ -25,31 +20,21 @@ rather than guess.
 | `API_TEST_CMD` | `<the API/integration test runner, or NONE if not wired>` |
 | `BUILD_CMD` | `<the build command, if distinct from typecheck>` |
 | Repo topology | `<single-repo / monorepo / split-repo — see §9>` |
-| Packages | `<list the top-level packages or apps, e.g. web, api, worker>` |
+| Packages | `<the top-level packages or apps, e.g. web, api, worker>` |
 | Scope types | `<the valid scope classifications for this project — see §3>` |
-
-> **Never assume a command from convention.** A `test` script frequently runs something
-> that is not a test suite. Run it once, confirm what it does, and record the truth here.
-> Record `NONE` where a harness genuinely does not exist — an absent harness is a planning
-> constraint, not something to invent around.
 
 ---
 
 ## 1. The Workflow
 
 ```
-Prompt
-  ↓ Scope Classification
-  ↓ Graph Discovery
-  ↓ Ticket — plan, subtasks, agent-per-subtask, test cases ALL embedded
-  ↓ Developer Approval  ◀── the plan AND the delegation split approved together
-  ↓ Subagent Execution — one subtask at a time, partitioned by file
-  ↓ Sanity Gate — typecheck, lint, diff read (automatic, every subtask)
-  ↓ Verification by the orchestrator
-  ↓ Graph Update
-  ↓ AWAITING_TEST
-  ↓ [ Testing — ONLY if the developer explicitly asks. Loop until green, max 3 cycles ]
-  ↓ COMPLETED
+prompt → scope (§3) → graph discovery (§4)
+  → ticket: plan + subtasks + agent tier per subtask + test cases, all in one file (§2)
+  → DEVELOPER APPROVAL — the plan and the delegation split, together
+  → subagent execution, one subtask at a time, partitioned by file (§5)
+  → sanity gate on every subtask: typecheck · lint · diff read (§6)
+  → orchestrator verification → graph refresh → AWAITING_TEST
+  → [ testing ONLY on explicit request: loop to green, max 3 cycles (§7) ] → COMPLETED
 ```
 
 No implementation without an approved ticket. No exceptions.
@@ -58,79 +43,51 @@ No implementation without an approved ticket. No exceptions.
 
 ## 2. The Ticket Is The Only Artifact
 
-`ai-workspace/tickets/T-NNN-slug.md`, created from `.agents/templates/TICKET_TEMPLATE.md`.
+`ai-workspace/tickets/T-NNN-slug.md` from `.agents/templates/TICKET_TEMPLATE.md` — problem,
+discovery, plan, subtasks, agent-per-subtask, test cases, decisions. **One file per task,
+nothing else.** Never create separate plan files, execution logs, "Execution Log" / "Status
+Update" sections, separate test-case files, or summary and hand-off docs. *(API docs, SQL
+scripts, and module `agents.md` are deliverables, not process artifacts — still written.)*
+Plan-mode output is transient: paste it into the Plan section **verbatim** before work.
 
-**One file per task. Nothing else.** It carries the problem, the discovery, the plan, the
-subtasks, the agent assignment per subtask, the test cases, and the decisions.
+**Two parts, two audiences.** *Part A — Summary* for a technical lead or manager: what is
+wrong, what changes, how in short, impact & risk — plain language, **no file paths, function
+names, line numbers, or jargon**, ≤25 lines. *Part B — Technical Detail* for the implementing
+agent: root cause with `file:line`, non-goals, discovery, plan, subtasks, verification. Write
+B first, then compress into A. Each point stated once — A in plain language, B carries the
+evidence and does not restate it.
 
-Do **NOT** create:
+**Hygiene — this is the token budget.** Resume header (first ~7 lines) must be enough to
+resume: status, scope, current subtask, files; on resume read it first and the body only when
+you need the plan. Whole ticket **≤170 lines**. Update **in place** — never append. Discovery
+holds only findings that affect the plan; never paste raw graph or search output.
 
-- separate plan or implementation-plan files
-- execution logs, or "Execution Log" / "Status Update" sections inside the ticket
-- separate test-scenario or test-case files
-- summary, writeup, or hand-off docs
+**Status:** `TODO` → `IN_PROGRESS` → `AWAITING_TEST` → `COMPLETED` | `BLOCKED`.
+`AWAITING_TEST` = implementation verified, tests not run (§7) — that distinction is the point.
 
-*(Genuine deliverables are not process artifacts and are still written: API docs, SQL
-migration scripts, module `agents.md` files.)*
-
-**Plan mode:** when plan mode produces a plan, paste that content into the ticket's `Plan`
-section **verbatim** before starting work. The plan artifact is transient; the ticket is
-the durable record.
-
-### Ticket hygiene — this is the token budget
-
-- The **resume header** (first ~7 lines) must be enough to pick the work back up: status,
-  scope, current subtask, target files. When resuming, read the header first; read the body
-  only when you actually need the plan.
-- Keep the whole ticket under **~150 lines**. Update **in place**. Never append.
-- Condense discovery to the findings that affect the plan. Never paste raw graph or search
-  output into the ticket — it is dead weight on every later read.
-
-### Status
-
-`TODO` → `IN_PROGRESS` → `AWAITING_TEST` → `COMPLETED` | `BLOCKED`
-
-`AWAITING_TEST` exists because testing is deferred by default (§7). It means implementation
-is verified but tests have not run — the distinction between that and `COMPLETED` is the
-whole point.
-
-### The active-ticket pointer
-
-`ai-workspace/active-ticket` is a **pointer, not a journal** — at most 5 lines: ticket ID,
-path, status, current subtask, one blocker line. **Overwrite** it on every status change.
-
-An append-only active-ticket becomes a second source of truth that duplicates ticket
-content, grows without bound, and gets re-read on every resume. Do not let it.
+**`ai-workspace/active-ticket` is a pointer, not a journal** — ≤5 lines (ID, path, status,
+current subtask, one blocker), **overwritten** on every status change. An append-only one
+becomes a second source of truth that grows forever and is re-read on every resume.
 
 ---
 
 ## 3. Scope Classification
 
-Classify before any work. The scope determines which docs load and which rules apply.
-
-Default scopes (adjust in §0 for this project):
-
-- **frontend** — UI, UX, client-side logic, rendering, user interactions
-- **backend** — API, middleware, service logic, data access, business rules
-- **fullstack** — both sides: UI *and* the API contract it depends on
-
-Do not assume `fullstack` unless the task genuinely spans both. A wider scope means a wider
-blast radius and more context loaded.
+Classify before any work; scope decides which docs load. Defaults (adjust in §0): **frontend**
+— UI, client logic, rendering · **backend** — API, middleware, services, data access, business
+rules · **fullstack** — both, including the API contract the UI depends on. Do not claim
+`fullstack` unless the task genuinely spans both: wider scope, wider blast radius.
 
 ---
 
-## 4. Discovery Before Editing
+## 4. Discovery Before Editing — Graph First
 
-This project maintains a **Graphify knowledge graph** — a queryable map of the codebase
-(nodes for files/functions/components, edges for calls and imports, clustered into
-communities). Use it instead of broad directory scans.
+The project keeps a **Graphify knowledge graph** of the codebase. Query it instead of scanning
+directories. Setup and advanced use: `.agents/rules/graphify.md`. No graph yet → building it
+is a setup task, not a licence to skip discovery.
 
-Setup and full tool reference: `.agents/rules/graphify.md`. If the graph does not exist
-yet, build it before the first ticket — an unbuilt graph is a setup task, not a licence to
-skip discovery.
-
-| Situation | Call |
-|-----------|------|
+| Need | Call |
+|------|------|
 | Which files relate to a feature | `query_graph` with a keyword |
 | A specific function/component/module | `get_node` by label |
 | What calls this / what it calls | `get_neighbors` |
@@ -139,250 +96,145 @@ skip discovery.
 | How two concepts connect | `shortest_path` |
 | Orientation — counts | `graph_stats` |
 
-**Protocol:**
-
-1. **Before any exploration** — query the graph first. Use the returned paths and node IDs
-   to target reads precisely instead of scanning directories.
-2. **Before writing or editing** — `get_neighbors` on what you are about to touch, to learn
-   its callers and dependents. This is what prevents unintended breakage.
-3. **For cross-cutting changes** — `shortest_path` from entry point to affected leaves, to
-   map the full call chain before touching anything.
-4. **Do not skip it for "quick" lookups** — a graph query surfaces non-obvious relationships
-   that text search misses.
-
-Graph discovery must be complete **before** the plan section is written. After
-implementation is verified, refresh the graph **once per ticket** — not once per subtask.
+Query the graph **before any exploration**, and use the returned paths to target reads.
+`get_neighbors` on anything you are about to edit, for callers and dependents — this is what
+prevents unintended breakage. `shortest_path` entry point → leaves for cross-cutting changes.
+No exemption for "quick" lookups. Discovery completes **before** the plan is written; refresh
+the graph **once per ticket** after implementation is verified, not per subtask.
 
 ---
 
 ## 5. Execution Is Always Subagentic
 
-Implementation is delegated. This is the default; the developer never has to ask for it.
+Implementation is delegated by default; the developer never has to ask for it.
 
 | Tier | Role |
 |------|------|
-| **Small model** (e.g. Haiku) | Mechanical single-site edits — swap a formatter, change one render line, align a fallback value, rename a field |
+| **Small model** (e.g. Haiku) | Mechanical single-site edits — swap a formatter, change one render line, align a fallback, rename a field |
 | **Mid model** (e.g. Sonnet) | Design judgment, cross-file contracts, correctness and date/time reasoning, new modules, anything with an invariant to preserve |
 | **Orchestrator** (e.g. Opus, the main loop) | **Never writes code.** Plans the split, dispatches, reads every diff, verifies against acceptance criteria |
 
-### Rules
-
-- **Agent tier is assigned per subtask in the ticket at plan time** — so the developer
-  approves the delegation split along with the plan, not after the fact.
-
-- **Partition by FILE, not by subtask.** One agent owns exactly one file, or a set of files
-  no other agent touches. Where several subtasks land in the same file, one agent takes all
-  of them. *Parallel agents sharing a file will clobber each other's edits* — this is the
-  hard constraint, not a preference.
-
-- **Order matters.** Foundation subtasks — new shared helpers or modules that other files
-  will import — run to completion **first**. Then consumer edits fan out in parallel.
-
-- **The brief is minimal.** Each subagent gets only:
-  1. its subtask text
-  2. exact file paths and line numbers
-  3. the ticket's non-goals
-  4. its acceptance condition
-  5. "touch nothing else"
-
-  **Never paste the whole ticket, the whole plan, or the graph dump into a subagent prompt.**
-  That is the single largest source of waste in subagentic development — it multiplies the
-  same context across every agent you spawn.
-
-- **The return is fixed and compact.** No prose, no restating the plan:
-
+- **Tier is assigned per subtask in the ticket at plan time**, so the developer approves the
+  delegation split along with the plan — not after the fact.
+- **Partition by FILE.** One agent owns one file, or a file set no other agent touches;
+  several subtasks in one file all go to that file's agent. Parallel agents sharing a file
+  clobber each other silently — hard constraint, not a preference.
+- **Foundation first.** Shared helpers or modules others import run to completion before
+  consumer edits fan out in parallel.
+- **The brief is minimal:** subtask text · exact paths and line numbers · the ticket's
+  non-goals · its acceptance condition · "touch nothing else". **Never paste the whole ticket,
+  the whole plan, or a graph dump into a subagent prompt** — the single largest source of
+  waste in subagentic development.
+- **The return is fixed and compact**, no prose, no restating the plan:
   ```
   FILES: <paths touched>
   CHANGES: <≤10 lines, what changed and where>
   SELF-CHECK: <typecheck/lint result, or the specific condition verified>
   ```
+- **Read the actual diff** before marking a subtask `[x]`. A subagent's claim that it did
+  something is not evidence that it did.
 
-- **The orchestrator reads the actual diff** before marking any subtask `[x]`. A subagent's
-  claim that it did something is not evidence that it did.
-
-### Execution constraints
-
-- One subtask dispatched and verified per response
-- Only modify files listed in the ticket's plan section
-- No new frameworks, no unplanned refactors, no silent architecture changes
-- **Never modify existing UI design** without explicit developer approval
-- Do not expand scope mid-execution; if the plan is wrong, stop and revise the ticket
+Constraints: one subtask dispatched and verified per response · only files listed in the
+ticket's plan · no new frameworks, unplanned refactors, or silent architecture changes ·
+**never modify existing UI design without explicit developer approval** · if the plan is
+wrong, stop and revise the ticket rather than expanding scope mid-execution.
 
 ---
 
 ## 6. Sanity Gate — Automatic, Every Subtask
 
-Cheap static checks that run **during** implementation. These are **not** "testing" and are
-never skipped or deferred.
-
-| Check | Command |
-|-------|---------|
-| Types | `TYPECHECK_CMD` in the affected package |
-| Lint | `LINT_CMD`, **scoped to the touched files** — never lint the whole repo to check one file |
-| Logic | The orchestrator reads the diff against the subtask's acceptance condition |
-
-A subtask is not `[x]` until types are clean, lint is clean on the touched files, and the
-diff has been read.
+Cheap static checks during implementation. **Not** "testing"; never skipped or deferred.
+`TYPECHECK_CMD` in the affected package · `LINT_CMD` **scoped to the touched files** (never
+lint the whole repo to check one file) · orchestrator reads the diff against the subtask's
+acceptance condition. No `[x]` until all three are clean.
 
 ---
 
 ## 7. Testing — On Explicit Request Only
 
-**Do not run tests unless the developer explicitly asks.** Write the cases at plan time
-into the ticket's Verification table, leave them `NOT RUN`, and set the ticket to
-`AWAITING_TEST`. The sanity gate (§6) is what guards correctness in the meantime.
-
-### Prefer functional tests. Prove behavior at the lowest layer that can prove it
-
-```
-pure function  →  unit of state/logic  →  service  →  API  →  browser (last resort)
-```
+**Never run tests unless the developer explicitly asks** — `/testing` is that request. Author
+the cases at plan time, leave them `NOT RUN`, set `AWAITING_TEST`. §6 guards correctness
+meanwhile. **Prove behavior at the lowest layer that can prove it:**
+`pure function → state/logic unit → service → API → browser (last resort)`
 
 | Tool class | Use for | Command |
 |------------|---------|---------|
 | Unit | Pure functions, logic units, component/state behavior | `UNIT_TEST_CMD` |
 | API / Integration | Endpoint behavior, cross-layer flows | `API_TEST_CMD` |
-| Dry Run | Static or aesthetic changes only — typecheck + diff read | — |
-| Browser / E2E | **Avoid.** Only when a flow is genuinely unreachable functionally, and only with explicit developer approval | — |
+| Dry run | Static or aesthetic changes only — typecheck + diff read | — |
+| Browser / E2E | **Avoid.** Only if genuinely unreachable functionally, with explicit developer approval | — |
 
-Browser-level testing is slow, flaky, and expensive to diagnose. Any behavior expressible
-as a function-level assertion must be tested that way instead.
+**Confirm the harness exists first:** if `API_TEST_CMD` is `NONE`, say so in the ticket and
+treat wiring it as its own approved task. Never write cases against a runner that is not there.
 
-**Before planning tests, confirm the harness exists.** If `API_TEST_CMD` is `NONE`, say so
-in the ticket and treat wiring it as its own approved task. Do not write test cases against
-a runner that is not there.
+**The loop:** run → fail → diagnose → fix via subagent → re-run. **Hard cap 3 fix cycles.** On
+the 4th failure stop, record the failing case and your diagnosis, hand it back — by then the
+problem is usually the specification. Record every outcome as `PASS` / `FAIL` / `NOT RUN`.
 
-### The test loop
-
-```
-run → fail → diagnose → fix (dispatch a subagent) → re-run
-```
-
-Repeat until green. **Hard cap: 3 fix cycles.** On the 4th failure, stop — record the
-failing case and your diagnosis in the ticket and hand it back to the developer. An
-unbounded fix loop burns tokens without converging, and by the fourth attempt the problem
-is usually the specification, not the code.
-
-Record every outcome in the ticket's Verification table: `PASS` / `FAIL` / `NOT RUN`.
-
-### Closure
-
-`COMPLETED` requires: sanity gate green, every diff verified by the orchestrator, and
-either the requested tests passing or the developer approving closure without them.
+**`COMPLETED` requires:** sanity gate green · every diff verified by the orchestrator · the
+requested tests passing, or the developer approving closure without them.
 
 ---
 
-## 8. Module `agents.md` Files
+## 8. Module `agents.md`
 
-Every module should carry an `agents.md` at its root — an AI-oriented quick reference so an
-agent can orient in one read instead of exploring. Template:
-`.agents/templates/AGENTS_MD_TEMPLATE.md`.
-
-**Maintain proactively:**
-
-- First work on a module without one → create it immediately
-- After significant changes (new services, refactored components, new routes) → update it
-- Before major modifications → read the existing one for current state
-
-**Contents:** module purpose (one line) · key exports with `file:line` · dependencies ·
-architecture/layer breakdown · common tasks ("to add an endpoint…") · where tests live ·
-non-obvious constraints and gotchas.
-
-**Format:** markdown, plain language, **max 100 lines** — scannable in one viewport.
+Every module carries one at its root so an agent orients in one read instead of exploring.
+Template `.agents/templates/AGENTS_MD_TEMPLATE.md`, **max 100 lines**: purpose · key exports
+with `file:line` · dependencies · layer breakdown · common tasks · where tests live ·
+non-obvious gotchas. Missing → create it on first work there. Significant change → update it.
+Major modification → read it first.
 
 ---
 
 ## 9. Repository Topology
 
-Fill in §0. The rules above say "the affected package" rather than naming directories, so
-they hold for any of these:
+Declare it in §0. The rules say "the affected package" rather than naming directories, so they
+hold for a single repo, a monorepo (scope and gate per package), and split repos under one
+parent — where each subdirectory is its own git repo: `cd` into the specific repo before any
+git command · commit and push within that repo only · **never** commit across repos from the
+parent · the shared `ai-workspace/` lives at the parent, with no nested copies.
 
-- **Single repo** — one package, one remote. Nothing special.
-- **Monorepo, one git repo** — several packages, one history. Scope changes to a package;
-  run the sanity gate in that package.
-- **Split repos under one parent** — each subdirectory is a standalone git repo with its own
-  `.git`, history, and remote. This shape needs care:
-  - `cd` into the specific repo before any git command
-  - Commit within that repo only
-  - Push to that repo's own remote
-  - **Never** try to commit across both from the parent directory
-  - The shared `ai-workspace/` lives at the parent; nested copies must not be created
-
-**One authority for the rules.** If a subdirectory carries its own rules or workflow docs,
-they are *views* of this file and must say so, naming this file as authoritative. Duplicated
-rule docs drift, then contradict, then agents follow the stale copy. Any doc describing a
-superseded process must carry an explicit superseded banner rather than being left to be
-found and believed.
+**One authority.** A subdirectory's own rules or workflow doc is a *view* of this file and must
+say so. Anything describing a superseded process carries a superseded banner. Duplicated rule
+docs drift, then contradict, then get followed.
 
 ---
 
 ## 10. Standing Rules
 
-### Communication style
+**Communication.** Answer like a developer briefing a technical manager: outcome first, short
+bullets over paragraphs, only what is needed to understand the decision, issue, or next step.
+Technical detail is welcome — explained, not jargon-laden. No repetition, no generic filler, no
+text dumps. Offer further detail; supply it when asked. Governs conversation only — files the
+agent writes follow their templates, and §5's return format wins where they overlap.
 
-Respond like a developer explaining work to a technical manager.
+**Database.** Never CRUD a real database. Schema change → write SQL to
+`ai-workspace/sql/NNN_description.sql`, ask the developer to review and run it, then update
+`ai-workspace/docs/db-architecture.md`. Detail: `.agents/rules/database.md`.
 
-- Keep responses short, structured, and to the point
-- Prefer bullets, headings, and short phrases over long paragraphs
-- Start with the direct answer or outcome
-- Include only what is needed to understand the decision, issue, or next step
-- Technical detail is welcome — explain it clearly, avoid unnecessary jargon
-- Do not repeat information or add generic explanations
-- Do not dump large amounts of text when a concise answer is sufficient
-- Optimize for clarity and scanability, not verbosity
-- If more detail may be useful, offer it — provide it only when asked
+**API contracts.** Document every new or changed endpoint in
+`ai-workspace/docs/api/NNN_description.md` — body, params, query, headers, response shape,
+validation notes. A backend API change is never left undocumented. Keep the declared layer
+order (commonly `Route → Controller → Service → Model`): HTTP validates and delegates, the
+service layer holds business logic and stays framework-free, the data layer holds queries only.
 
-This governs conversation with the developer. It does **not** apply to files the agent
-writes: tickets, `agents.md`, and API docs follow their own templates. The fixed subagent
-return format in §5 is stricter and wins where they overlap.
+**Time.** Dates involved → adopt `.agents/rules/timezone.md`: the client supplies the timezone
+against a documented default, the server's own local time is never an input, store UTC and
+convert at the edges. This bug class is silent and corrupts stored data.
 
-### Database safety
+**Environment.** Never hardcode credentials, keys, IDs, secrets, URLs, or test inputs — read
+from environment/config, **including** in scratch and diagnostic scripts. Missing variable →
+stop and ask. The agent is not authorized to edit environment files.
 
-Never perform CRUD against a real database. For schema changes:
-
-1. Write SQL to `ai-workspace/sql/NNN_description.sql`
-2. Request the developer review and execute it manually
-3. Update `ai-workspace/docs/db-architecture.md`
-
-Full detail: `.agents/rules/database.md`.
-
-### API contracts
-
-- Document every new or changed endpoint in `ai-workspace/docs/api/NNN_description.md`
-  (request body, params, query, headers, response shape, validation notes)
-- Keep the layer order the project declares (commonly `Route → Controller → Service →
-  Model`): the HTTP layer validates and delegates, the service layer holds business logic
-  and stays framework-free, the data layer holds queries and no business logic
-- Backend API changes must never be left undocumented
-
-### Time and timezones
-
-If the project handles dates at all, adopt `.agents/rules/timezone.md` — an explicit
-client-supplied-timezone policy with a documented default. The server's own local time is
-never an input. Store UTC; convert at the edges. This category of bug is silent, reaches
-production, and corrupts stored data.
-
-### Environment and configuration
-
-- Never hardcode credentials, keys, IDs, secrets, URLs, or test inputs — read from
-  environment/config
-- Applies universally, **including** scratch and one-off diagnostic scripts
-- If a required variable is missing, stop and request the developer add it
-- The agent is not authorized to modify environment files directly
-
-### General constraints
-
-- Prefer minimal, safe changes — no cleanup beyond the task scope
-- Maintain backward compatibility unless explicitly instructed
-- Never perform repo-wide changes without explicit approval
-- Clarify ambiguity before implementing — never guess requirements
-- Temporary or scratch scripts go in `temp/` or `tmp/`, never the repo root
+**General.** Minimal safe changes, no cleanup beyond task scope · keep backward compatibility
+unless told otherwise · no repo-wide changes without explicit approval · clarify ambiguity,
+never guess requirements · scratch scripts in `temp/`, never the repo root.
 
 ---
 
 ## 11. Load On Demand
 
-Do **not** preload these. Fetch by scope, when the task actually needs them.
+Never preload. Fetch by scope, when the task actually needs it. Missing doc → stop and ask.
 
 | Doc | Load when |
 |-----|-----------|
@@ -398,35 +250,7 @@ Do **not** preload these. Fetch by scope, when the task actually needs them.
 | `ai-workspace/docs/db-architecture.md` | schema work |
 | `ai-workspace/active-ticket` | resuming in-progress work |
 
-If a required doc is missing, stop and request clarification.
-
-### Skills
-
-Task-shaped runbooks in `.claude/skills/`, invoked by name. They do not replace anything
-above — each one carries out this workflow for a particular kind of task, and names the rule
-doc that governs it.
-
-| Skill | Invoke for |
-|-------|-----------|
-| `/testing` | The explicit request to run tests — the trigger §7 refers to |
-| `/refactor` | Behavior-preserving restructuring: extract, split, rename, de-duplicate |
-| `/ui-responsiveness` | Auditing and fixing UI behavior across viewport sizes |
-
-Skills are auto-discovered from `.claude/skills/<name>/SKILL.md`. Adding one needs no
-registration anywhere — but a skill that contradicts this file is wrong, not authoritative.
-
----
-
-## 12. Why These Rules Exist
-
-Each rule here was paid for. `LESSONS.md` records what went wrong in production to produce
-it. Read it before deciding a rule is bureaucratic overhead — the short version:
-
-- Multi-file-per-task workflows produced **191 obsolete markdown files** in one project
-  before anyone noticed
-- An append-only status file became a second source of truth that grew forever
-- Whole tickets pasted into every subagent prompt multiplied context for no benefit
-- Parallel agents on one file silently overwrote each other's work
-- Browser test suites got specified in detail and then never ran, once
-- Test plans were written against a harness that did not exist
-- Duplicated rule docs in subdirectories drifted until agents followed the stale copy
+**Skills** — auto-discovered from `.claude/skills/<name>/SKILL.md`, each carrying out this
+workflow for one kind of task: `/testing` (the §7 trigger) · `/refactor` (behavior-preserving
+restructuring) · `/ui-responsiveness` (viewport behavior audit and fix). A skill that
+contradicts this file is wrong, not authoritative.

@@ -21,7 +21,7 @@ operational runbook for carrying them out. Where the two differ, that file wins.
 ## Runbook
 
 **1. Load the ticket.** Read `ai-workspace/active-ticket` for the pointer, then the
-ticket's resume header and §7 Verification table. If there is no ticket, stop — there is
+ticket's resume header and §B6 Verification table. If there is no ticket, stop — there is
 nothing to test against. Ad-hoc test runs with no recorded expectation produce results
 nobody can act on later.
 

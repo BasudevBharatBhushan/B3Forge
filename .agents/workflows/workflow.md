@@ -59,15 +59,25 @@ nothing.
 
 `ai-workspace/tickets/T-NNN-slug.md` from `.agents/templates/TICKET_TEMPLATE.md`.
 
+The ticket has two parts. **Part A** is the plain-language summary a technical lead or
+manager reads to approve the work — no file paths, no function names, no jargon, 25 lines
+max. **Part B** is the technical detail the implementing agent works from.
+
 | Section | Purpose |
 |---------|---------|
 | Resume header | Cheap resume — status, scope, current subtask, target files |
-| Problem / Objective / Non-goals | Non-goals are copied into every subagent brief |
-| Discovery | Condensed graph findings |
-| Plan | The plan-mode artifact, verbatim |
-| Subtasks | Table: subtask, file(s), **agent tier**, done-checkbox |
-| Verification | Test cases authored now, run later or never |
-| Decisions & Blockers | Only what a future reader needs |
+| A1–A4 (Part A) | What is wrong · what changes · how, in short · impact & risk |
+| B1 Root cause | The mechanism, with `file:line` evidence |
+| B2 Non-goals | Copied into every subagent brief |
+| B3 Discovery | Condensed graph findings |
+| B4 Plan | The plan-mode artifact, verbatim |
+| B5 Subtasks | Table: subtask, file(s), **agent tier**, done-checkbox |
+| B6 Verification | Test cases authored now, run later or never |
+| B7 Decisions & Blockers | Only what a future reader needs |
+
+**Write Part B first, then compress it into Part A.** Part A states each point once in plain
+language; Part B carries the evidence and does not restate it. Objective is not its own
+section — the outcome lives in A2 and is proved by a matching row in B6.
 
 Nothing else is created for a task. Genuine deliverables — API docs, SQL scripts, module
 `agents.md` — are not process artifacts and are still written.
