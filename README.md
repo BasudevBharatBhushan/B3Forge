@@ -13,7 +13,7 @@ looser version of it failed. `LESSONS.md` records exactly how.
 | | |
 |---|---|
 | **One artifact per task** | A single ticket carries the problem, plan, subtasks, agent assignments, test cases, and decisions. No separate plan, log, or test-scenario files. |
-| **Implementation is delegated** | Small models do mechanical edits, mid models do judgment work, the orchestrator never writes code — it plans, dispatches, and reads every diff. |
+| **Implementation is delegated** | `impl-small` (Haiku) does mechanical edits, `impl-mid` (Sonnet) does judgment work — the tier is bound by each agent's `model:` frontmatter, not by a prompt. The orchestrator never writes code; it plans, dispatches, and reads every diff. |
 | **Partition by file, not subtask** | One agent owns one file. Parallel agents sharing a file overwrite each other silently. |
 | **Minimal briefs** | Each subagent gets its subtask, exact `file:line` targets, non-goals, acceptance condition, and "touch nothing else." Never the whole ticket. |
 | **Graph-first discovery** | Query the knowledge graph before reading files. Targeted reads instead of directory scans. |
@@ -112,7 +112,9 @@ This template attacks that on four fronts:
    reading the plan.
 3. **Minimal briefs** — context sent to N agents costs N times, so send only what each one
    needs.
-4. **Tiered models** — the expensive model judges; it does not type.
+4. **Tiered models** — the expensive model judges; it does not type. Enforced by two agent
+   definitions in `.claude/agents/` whose `model:` frontmatter binds the tier; the ticket's
+   subtask table names the agent per row, so approving the plan approves the model spend.
 
 The counterintuitive part is #4. Having the strongest model write the code is the obvious
 default, and it is both more expensive and *worse at review* — an author verifies their own

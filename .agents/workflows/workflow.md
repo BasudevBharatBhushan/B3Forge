@@ -71,7 +71,7 @@ max. **Part B** is the technical detail the implementing agent works from.
 | B2 Non-goals | Copied into every subagent brief |
 | B3 Discovery | Condensed graph findings |
 | B4 Plan | The plan-mode artifact, verbatim |
-| B5 Subtasks | Table: subtask, file(s), **agent tier**, done-checkbox |
+| B5 Subtasks | Table: subtask, file(s), **`subagent_type`** (`impl-small`/`impl-mid`), done-checkbox |
 | B6 Verification | Test cases authored now, run later or never |
 | B7 Decisions & Blockers | Only what a future reader needs |
 
@@ -99,14 +99,37 @@ The orchestrator does not write code. It plans, dispatches, and verifies.
 
 ### Tiering
 
-| Tier | Give it |
-|------|---------|
-| Small | Mechanical single-site edits — swap a formatter, change one line, align a default, rename a field |
-| Mid | Design judgment, cross-file contracts, correctness and date/time reasoning, new modules, invariants to preserve |
-| Orchestrator | Planning, dispatching, diff reading, verification. No edits. |
+| `subagent_type` | Model | Give it |
+|-----------------|-------|---------|
+| `impl-small` | Haiku | Mechanical single-site edits — swap a formatter, change one line, align a default, rename a field |
+| `impl-mid` | Sonnet | Design judgment, cross-file contracts, correctness and date/time reasoning, new modules, invariants to preserve |
+| Orchestrator | the main loop | Planning, dispatching, diff reading, verification. No edits. |
 
 **The tiering test:** if the subtask can be stated as "in file X at line N, change A to B,"
-it is small-tier work. If stating it requires explaining *why*, it needs the mid tier.
+it is `impl-small` work. If stating it requires explaining *why*, it needs `impl-mid`.
+Default to `impl-small`; promote only when the test forces it.
+
+### Dispatch — how the tier is actually enforced
+
+The model is bound by the `model:` frontmatter in `.claude/agents/impl-small.md` and
+`.claude/agents/impl-mid.md`. Nothing else binds it — a tier named in a prompt is a label,
+not a routing decision.
+
+```
+Agent({ subagent_type: "impl-small", prompt: <the five-part brief> })
+```
+
+- The `subagent_type` string comes straight from the ticket's Agent column.
+- **Never** dispatch implementation to `general-purpose`, `claude`, or any other type —
+  those inherit the orchestrator's model and put every subtask on the expensive tier.
+- **Never** pass a `model` override. If a tier is wrong for a whole class of work, edit the
+  agent file; if it is wrong for one row, fix the row in the ticket.
+- Read-only work stays in the orchestrator. Dispatching discovery buys a summary you then
+  have to trust, at the cost of a round trip.
+
+**When `impl-small` returns `ESCALATE:`** — it was tiered wrong. Correct the row in the
+ticket to `impl-mid`, then re-dispatch. Do not silently retry on a bigger model; the ticket
+is the record of what the work actually cost.
 
 ### Partitioning — the hard constraint
 

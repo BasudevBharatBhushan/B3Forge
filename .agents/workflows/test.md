@@ -34,14 +34,15 @@ see `CLAUDE.md` §7. What runs during implementation instead is the sanity gate 
 5. **Loop on failure:**
 
    ```
-   run → diagnose → fix (dispatch a subagent) → re-run
+   run → diagnose → fix (dispatch `impl-small` or `impl-mid`) → re-run
    ```
 
    **Hard cap: 3 fix cycles.** On the 4th failure, stop. Record the failing case and your
    diagnosis in the ticket and hand it back — by that point the problem is usually the
    expected value or the requirement, not the code.
 
-   Fixes follow the normal execution rules: delegated to a subagent, partitioned by file,
+   Fixes follow the normal execution rules: delegated to `impl-small`/`impl-mid` by the same
+   tiering test, never to a generic agent type, partitioned by file,
    diff read by the orchestrator.
 
 6. **Record every outcome** in the ticket's Verification table as `PASS` / `FAIL` /

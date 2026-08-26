@@ -52,8 +52,8 @@ is the subtask partition.
   mid-execution — that means discovery was incomplete, so stop and revise the ticket.
 - **Foundation first.** The new shared helper or moved module runs to completion as subtask
   1. Consumer edits fan out only after it exists. Order this explicitly in §6.
-- **Tier honestly.** A mechanical rename at known line numbers is `small`. Anything where
-  the agent must decide *what the right boundary is* is `mid` — extraction, layer
+- **Tier honestly.** A mechanical rename at known line numbers is `impl-small`. Anything
+  where the agent must decide *what the right boundary is* is `impl-mid` — extraction, layer
   separation, and signature design are judgment, not mechanics.
 - State the invariant in each subtask's acceptance condition: *"the call sites produce
   identical results; no signature visible outside this module changes."*

@@ -82,16 +82,24 @@ step maps to a line in A3 — the technical detail of that step, not a second su
 > other silently. Foundation rows (new shared modules others import) run to completion
 > before consumer rows fan out.
 
+> The **Agent** column is the literal `subagent_type` this row is dispatched to. Only
+> `impl-small` or `impl-mid` are valid. Approving this table approves the model spend.
+
 | # | Subtask | File(s) | Agent | Done |
 |---|---------|---------|-------|------|
-| 1 | [One change, one concern] | `path/a` | small | [ ] |
-| 2 | [One change, one concern] | `path/b` | mid | [ ] |
+| 1 | [One change, one concern] | `path/a` | `impl-small` | [ ] |
+| 2 | [One change, one concern] | `path/b` | `impl-mid` | [ ] |
 
-**Tiers:** `small` = mechanical single-site edit · `mid` = judgment, contracts, correctness
-reasoning · the orchestrator never implements, only dispatches and verifies.
+**Tiers:** `impl-small` (Haiku) = mechanical single-site edit · `impl-mid` (Sonnet) =
+judgment, contracts, correctness reasoning · the orchestrator never implements, only
+dispatches and verifies. Model is set by `.claude/agents/<name>.md`, never by the dispatch
+prompt — never pass a `model` override.
 
 *Tiering test: if the subtask can be stated as "in file X at line N, change A to B," it is
-`small`. If stating it requires explaining why, it is `mid`.*
+`impl-small`. If stating it requires explaining why, it is `impl-mid`.*
+
+*Default to `impl-small` and promote only when the test forces it. If every row here says
+`impl-mid`, the work was not tiered — split the mechanical parts into their own rows.*
 
 ## B6. Verification
 

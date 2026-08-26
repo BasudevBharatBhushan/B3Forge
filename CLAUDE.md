@@ -23,13 +23,17 @@ value and a planning constraint, not something to invent around.
 | Packages | `<the top-level packages or apps, e.g. web, api, worker>` |
 | Scope types | `<the valid scope classifications for this project — see §3>` |
 
+**Implementation agents** are fixed and not configurable here — `impl-small` and `impl-mid`,
+defined in `.claude/agents/`. Their `model:` frontmatter is what actually binds the tier.
+Change a tier by editing that file, never by prompting.
+
 ---
 
 ## 1. The Workflow
 
 ```
 prompt → scope (§3) → graph discovery (§4)
-  → ticket: plan + subtasks + agent tier per subtask + test cases, all in one file (§2)
+  → ticket: plan + subtasks + `subagent_type` per subtask + test cases, all in one file (§2)
   → DEVELOPER APPROVAL — the plan and the delegation split, together
   → subagent execution, one subtask at a time, partitioned by file (§5)
   → sanity gate on every subtask: typecheck · lint · diff read (§6)
@@ -108,14 +112,41 @@ the graph **once per ticket** after implementation is verified, not per subtask.
 
 Implementation is delegated by default; the developer never has to ask for it.
 
-| Tier | Role |
-|------|------|
-| **Small model** (e.g. Haiku) | Mechanical single-site edits — swap a formatter, change one render line, align a fallback, rename a field |
-| **Mid model** (e.g. Sonnet) | Design judgment, cross-file contracts, correctness and date/time reasoning, new modules, anything with an invariant to preserve |
-| **Orchestrator** (e.g. Opus, the main loop) | **Never writes code.** Plans the split, dispatches, reads every diff, verifies against acceptance criteria |
+| Tier | `subagent_type` | Role |
+|------|-----------------|------|
+| **Small** | `impl-small` | Mechanical single-site edits — swap a formatter, change one render line, align a fallback, rename a field |
+| **Mid** | `impl-mid` | Design judgment, cross-file contracts, correctness and date/time reasoning, new modules, anything with an invariant to preserve |
+| **Orchestrator** | — (the main loop) | **Never writes code.** Plans the split, dispatches, reads every diff, verifies against acceptance criteria |
+
+### Dispatch is by agent name, not by intention
+
+A tier written in prose does not bind a model. **The only thing that binds a model is the
+`model:` frontmatter in `.claude/agents/impl-small.md` and `.claude/agents/impl-mid.md`.**
+Therefore:
+
+- Every implementation dispatch is `Agent` with `subagent_type: "impl-small"` or
+  `"impl-mid"` — the literal string from the ticket's Agent column.
+- **Never dispatch implementation to `general-purpose`, `claude`, `Explore`, `Plan`, or any
+  other type.** Those inherit the orchestrator's model, which is how every subtask silently
+  ends up on the expensive tier. This is the failure mode this rule exists to prevent.
+- **Never pass a `model` override** on an implementation dispatch. The agent file is the
+  single source of truth; an override in a prompt is invisible to review and drifts.
+- The orchestrator has no Edit/Write budget for implementation. If you are about to edit a
+  source file yourself "because it is quick," that is a dispatch you skipped.
+- Read-only work — discovery, graph queries, diff reading, verification — stays in the
+  orchestrator. Do not dispatch it; a subagent that only reads costs a round trip and
+  returns a summary you then have to trust.
 
 - **Tier is assigned per subtask in the ticket at plan time**, so the developer approves the
-  delegation split along with the plan — not after the fact.
+  delegation split along with the plan — not after the fact. The Agent column holds the
+  literal `subagent_type`, so approval and dispatch read the same string and cannot diverge.
+- **Default to `impl-small`.** Promote a row to `impl-mid` only when the tiering test forces
+  it: if the subtask can be stated as "in file X at line N, change A to B," it is
+  `impl-small`. If stating it requires explaining *why*, it is `impl-mid`. A plan where every
+  row is `impl-mid` is a plan that was not tiered — split the mechanical parts out.
+- **`ESCALATE` is a valid return.** An `impl-small` agent that returns `ESCALATE:` was tiered
+  wrong, not broken. Re-dispatch that row to `impl-mid` and correct the tier in the ticket.
+  Never re-dispatch by simply raising the model on the same brief without recording it.
 - **Partition by FILE.** One agent owns one file, or a file set no other agent touches;
   several subtasks in one file all go to that file's agent. Parallel agents sharing a file
   clobber each other silently — hard constraint, not a preference.

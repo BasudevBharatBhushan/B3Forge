@@ -45,7 +45,7 @@ asserted functionally.
 **5. Loop on failure.**
 
 ```
-run → diagnose → fix (dispatch a subagent) → re-run
+run → diagnose → fix (dispatch `impl-small` or `impl-mid`) → re-run
 ```
 
 Fixes follow the normal execution rules: delegated, partitioned by file, diff read by the

@@ -72,7 +72,7 @@ change. Not screenshots, not raw CSS dumps.
   agent owns both. Where a shared layout primitive and its consumers both change, the
   primitive is subtask 1 and runs to completion first.
 - Mechanical single-site fixes (`max-width: 100%`, a wrap utility, one token swap) are
-  `small`. Restructuring how a layout reflows is `mid`.
+  `impl-small`. Restructuring how a layout reflows is `impl-mid`.
 
 ---
 

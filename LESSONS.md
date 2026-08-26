@@ -177,6 +177,31 @@ B," it's small-model work. If describing it requires explaining *why*, it needs 
 
 ---
 
+## 13. A tier written in prose is not a tier
+
+**What happened.** Lesson 10 was written into the rules and into every ticket's subtask
+table — `small`, `mid`, per row, approved at plan time. And every subtask still ran on the
+orchestrator's model. The tier column was documentation. Dispatch went to a generic
+subagent type, and a generic subagent **inherits the caller's model**. Nothing was
+misconfigured and nothing errored; the whole tiering scheme was decorative, and the bill
+looked exactly like having no tiering at all.
+
+The tell was that it was invisible. A rule that is ignored usually produces a wrong result.
+This one produced correct results at 10× the cost, so nothing surfaced it.
+
+**The rule.** A tier must be bound by a mechanism the agent cannot route around. Concretely:
+one agent definition file per tier, with `model:` in its frontmatter, and a ticket column
+holding the literal `subagent_type` that gets dispatched. No prompt-time `model` override —
+an override is invisible to review and drifts from the approved plan. `CLAUDE.md` §5.
+
+**The generalization.** Any rule of the form "the agent should choose X" is a suggestion
+until something outside the prompt makes X the only reachable option. Prefer a config file,
+a named artifact, or a tool boundary over an instruction. When you cannot, at least make the
+approved artifact carry the *exact literal* the execution step consumes — a plan that says
+`small` needs translating at dispatch time, and translation is where intent leaks.
+
+---
+
 ## 11. Cheap resume matters more than fewer files
 
 **What happened.** Reducing four files to one helped. But the recurring cost turned out to
@@ -212,3 +237,4 @@ Approving the plan approves the split. `CLAUDE.md` §5.
 8. **Bound every loop.** Repeated failure means the spec is wrong.
 9. **Judge ≠ author.** The reviewer should not be the writer.
 10. **Be honest about what ran.** `NOT RUN` beats implied coverage.
+11. **Bind rules to mechanism.** A tier in prose is a label; a tier in frontmatter is a tier.

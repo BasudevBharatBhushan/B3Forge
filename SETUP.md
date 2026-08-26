@@ -133,8 +133,11 @@ Fill in the scaffolds when you first need them:
 Run one small real ticket end to end:
 
 1. Classify scope, query the graph, write a ticket from the template
-2. Confirm the subtask table names an agent tier per row, decided at plan time
-3. Approve it, then dispatch — one file per agent
+2. Confirm the subtask table names `impl-small` or `impl-mid` per row, decided at plan time
+   — and that most rows are `impl-small`; an all-`impl-mid` plan was not tiered
+3. Approve it, then dispatch — one file per agent, `subagent_type` copied verbatim from the
+   table. Watch the transcript: each subagent should report the tier's model, not the
+   orchestrator's. If it reports the orchestrator's, the dispatch used a generic agent type
 4. Confirm the sanity gate actually runs and actually catches a deliberate type error
 5. Leave it at `AWAITING_TEST` and confirm nothing tried to run tests unasked
 6. Invoke `.agents/workflows/test.md` and confirm the loop caps at 3 fix cycles

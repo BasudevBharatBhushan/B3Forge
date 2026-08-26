@@ -64,12 +64,17 @@ If the plan turns out to be wrong, stop and revise the ticket. Do not improvise 
 Implementation is always delegated; the developer never has to request it. The orchestrator
 never writes code.
 
-| Tier | Scope |
-|------|-------|
-| Small | Mechanical single-site edits |
-| Mid | Judgment, cross-file contracts, correctness reasoning, new modules |
-| Orchestrator | Planning, dispatching, diff reading, verification. No edits. |
+| `subagent_type` | Model | Scope |
+|-----------------|-------|-------|
+| `impl-small` | Haiku | Mechanical single-site edits |
+| `impl-mid` | Sonnet | Judgment, cross-file contracts, correctness reasoning, new modules |
+| Orchestrator | the main loop | Planning, dispatching, diff reading, verification. No edits. |
 
+- The tier is bound by `model:` in `.claude/agents/<name>.md` — **not** by the prompt. Every
+  implementation dispatch names `impl-small` or `impl-mid` as its `subagent_type` and passes
+  **no** `model` override. Dispatching to `general-purpose` inherits the orchestrator's model
+  and is the standing failure mode
+- Default to `impl-small`; promote a row only when stating the subtask requires explaining *why*
 - Agent tier is recorded per subtask **at plan time**, so approval covers the split
 - **Partition by FILE, not by subtask.** Parallel agents must never share a file
 - Foundation subtasks complete before consumer edits fan out
