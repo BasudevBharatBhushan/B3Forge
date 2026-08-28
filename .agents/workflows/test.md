@@ -22,8 +22,13 @@ see `CLAUDE.md` §7. What runs during implementation instead is the sanity gate 
 3. **Verify compliance** with `.agents/rules/rules.md` and the ticket's non-goals — confirm
    nothing outside the plan was touched.
 
-4. **Execute the cases already written** in the ticket's Verification table. Do not invent
-   new cases mid-run; if a genuine gap appears, add the row to the ticket and say so.
+4. **Execute the cases already written.** For a module **child** ticket, this run covers only
+   that child's own Verification table. For a module **parent** ticket, this run executes its
+   M7 Module-Level Acceptance cases instead — and only once every child is `AWAITING_TEST` or
+   `COMPLETED`; if any child is not there yet, stop and name it.
+
+   Do not invent new cases mid-run; if a genuine gap appears, add the row to the ticket and
+   say so.
 
    Use the lowest layer that can prove the behavior:
    `pure function → logic unit → service → API → browser (last resort)`.
@@ -59,3 +64,7 @@ see `CLAUDE.md` §7. What runs during implementation instead is the sanity gate 
 Only after this run can the ticket move to `COMPLETED`, and only if the sanity gate is
 green, every diff has been verified, and the requested tests pass. Anything unresolved keeps
 the ticket at `AWAITING_TEST` or `BLOCKED`, with the reason recorded.
+
+A module **parent** additionally requires its M7 Module-Level Acceptance cases passing, or
+explicit developer approval to close without them. Children may reach `COMPLETED`
+individually before M7 runs.

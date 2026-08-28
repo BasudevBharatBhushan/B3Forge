@@ -12,7 +12,7 @@ operational runbook for carrying them out. Where the two differ, that file wins.
 
 ```
 /testing              # run the active ticket's Verification table
-/testing T-014        # run a specific ticket's cases
+/testing <ticket ID>  # run that ticket's cases (Module-Level Acceptance for parents, B6 Verification for children)
 /testing <case #>     # re-run one case after a fix
 ```
 
@@ -24,6 +24,12 @@ operational runbook for carrying them out. Where the two differ, that file wins.
 ticket's resume header and §B6 Verification table. If there is no ticket, stop — there is
 nothing to test against. Ad-hoc test runs with no recorded expectation produce results
 nobody can act on later.
+
+The pointer file may carry a `PARENT: T-NNN (child M/N)` line. If the target ticket is a
+module **child**, run only its own B6 table — its parent's §M7 is not this run's business.
+If the target is a module **parent**, run its §M7 Module-Level Acceptance instead of a B6
+table, and only once every child is `AWAITING_TEST` or `COMPLETED`; if any child is not
+there yet, stop and say which.
 
 **2. Confirm the harness.** Check the `CLAUDE.md` §0 config block for the command each case
 needs. If it is `NONE`, that case is `NOT RUN` with the reason — wiring a harness is its
@@ -70,3 +76,7 @@ exist.
 Move to `COMPLETED` only when the sanity gate is green, every diff has been verified, and
 the requested cases pass. Anything unresolved stays `AWAITING_TEST` or goes `BLOCKED`, with
 the reason in §8.
+
+A module parent additionally requires its §M7 Module-Level Acceptance cases passing, or
+explicit developer approval to close without them. Children can reach `COMPLETED`
+individually before §M7 runs — the parent's closure does not gate theirs.

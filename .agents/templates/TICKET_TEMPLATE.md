@@ -2,9 +2,12 @@
 
 **Status:** TODO
 **Scope:** [scope type]
+**Type:** [module-addition | feature-addition | enhancement | bug-fix | refactor | migration | chore | security-fix]
 **Date:** YYYY-MM-DD
 **Current subtask:** —
 **Files:** `path/a`, `path/b`
+**Parent:** [T-NNN — delete this line entirely unless this ticket is a module component]
+**Depends on:** [T-NNN — delete this line entirely unless a sibling component must land first]
 
 <!-- RESUME HEADER ENDS HERE. Everything needed to pick this ticket back up is above.
      Read Part A to review the work. Read Part B only when implementing or digging in. -->
@@ -67,6 +70,17 @@
 
 > Condensed findings only. Never paste raw graph or search output here — it is re-read on
 > every later access and informs nothing.
+
+**If `Parent:` is set above**, Discovery points at the parent's Architecture Decisions (M3) /
+Cross-Component Contracts (M4) instead of re-deriving them. Complete this before B4:
+
+**Deviation Check** (module components only — delete this block if `Parent:` is unset)
+- [ ] Files touched fall within this component's `Files / area` cell in the parent's Component Manifest (M5)
+- [ ] No new cross-component contract beyond what the parent's M4 already defines
+- [ ] No subtask in this ticket's B5 exceeds the Manifest's tier bias for this component
+
+Any box unchecked → stop here, do not proceed to this ticket's B4/B5. Log it in the parent's Deviation
+Log (M9), get that re-approved, then resume this ticket.
 
 ## B4. Plan
 
