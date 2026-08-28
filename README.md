@@ -84,7 +84,7 @@ bin/cli.js                           The npx scaffolder. Copies this tree into a
     ui-responsiveness/               /ui-responsiveness — viewport audit and fixes
 
 ai-workspace/
-  active-ticket                      ≤5-line pointer. Overwritten, never appended
+  active-ticket                      ≤6-line pointer. Overwritten, never appended
   tickets/                           T-NNN-slug.md — one per task
   sql/                               Migrations for developer review. Never auto-executed
   docs/

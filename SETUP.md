@@ -17,7 +17,7 @@ graphify MCP server into `.mcp.json`, and appends `graphify-out/`, `temp/`, `tmp
 `.gitignore`. Use `--dry-run` first if you want to see it before it writes.
 
 Nothing existing is overwritten. If your project already has a `CLAUDE.md`, it is left
-untouched and the template is written beside it as `CLAUDE.agentic.md` — merge its §0–§12
+untouched and the template is written beside it as `CLAUDE.agentic.md` — merge its §0–§11
 in as your workflow section, keep your own project context, then delete it.
 
 Prefer to copy by hand:
@@ -113,7 +113,7 @@ silently, and corrupts stored data, which then needs its own correction script.
 ## 5. Seed the workspace
 
 ```bash
-# ai-workspace/active-ticket — a ≤5-line pointer. Overwritten, never appended.
+# ai-workspace/active-ticket — a ≤6-line pointer. Overwritten, never appended.
 Ticket: —
 Path: —
 Status: no active ticket

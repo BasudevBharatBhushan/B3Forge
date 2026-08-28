@@ -39,7 +39,7 @@ still written.)*
 - Graph discovery completes before the plan section is written
 - Plan-mode output is copied **verbatim** into the Plan section before execution
 - Tickets stay under ~150 lines, updated **in place**, never appended to
-- `active-ticket` is a ≤5-line pointer, **overwritten** on status change — not a journal
+- `active-ticket` is a ≤6-line pointer, **overwritten** on status change — not a journal
 
 Never implement without an approved ticket.
 

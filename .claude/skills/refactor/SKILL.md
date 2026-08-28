@@ -23,8 +23,8 @@ refactor — it is a fix or a feature, and it needs its own ticket.
 change first, then the restructuring, or the reverse. A mixed diff cannot be reviewed: every
 behavioral difference becomes ambiguous between "intended" and "broke it while moving it."
 
-If you discover a genuine bug mid-refactor, stop. Record it in §8, finish or abandon the
-refactor cleanly, and raise the bug as its own ticket.
+If you discover a genuine bug mid-refactor, stop. Record it in §B7 Decisions & Blockers,
+finish or abandon the refactor cleanly, and raise the bug as its own ticket.
 
 ---
 

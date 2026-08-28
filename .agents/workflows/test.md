@@ -50,8 +50,9 @@ see `CLAUDE.md` §7. What runs during implementation instead is the sanity gate 
    tiering test, never to a generic agent type, partitioned by file,
    diff read by the orchestrator.
 
-6. **Record every outcome** in the ticket's Verification table as `PASS` / `FAIL` /
-   `NOT RUN`. Do not create a separate test file.
+6. **Record every outcome** in the applicable table — B6 Verification for a child or M7
+   Module-Level Acceptance for a parent — as `PASS` / `FAIL` / `NOT RUN`. Do not create a
+   separate test file.
 
 7. **Report honestly.** If a case did not run — no harness, no environment, no data — record
    `NOT RUN` and say why. An accurate `NOT RUN` is worth more than an implication of

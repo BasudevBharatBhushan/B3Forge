@@ -96,7 +96,11 @@ re-opens approval for that child only, never blocking siblings already in flight
 
 [End-to-end scenario(s) spanning more than one component — the thing no single child's
 Verification table can prove alone. Authored at plan time, run only on explicit test
-request, same rule as §7.]
+request, same rule as §7. Record each outcome here; M7 is the parent's Verification table.]
+
+| # | Tool | Case | Expected | Result |
+|---|------|------|----------|--------|
+| 1 | [tool] | [cross-component condition] | [exact expectation] | NOT RUN |
 
 The parent rolls to `AWAITING_TEST` once every child is `AWAITING_TEST` or `COMPLETED`.
 `/testing T-NNN` invoked on the parent ID runs these M7 cases — a child's own `/testing`

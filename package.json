@@ -5,6 +5,9 @@
   "bin": {
     "agentic-init": "bin/cli.js"
   },
+  "scripts": {
+    "test": "node test/conformance.js"
+  },
   "files": [
     "bin",
     ".agents",

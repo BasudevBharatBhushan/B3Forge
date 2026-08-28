@@ -55,8 +55,16 @@ function parseArgs(argv) {
     else if (a === '--dry-run' || a === '-n') opts.dryRun = true;
     else if (a === '--no-mcp') opts.mcp = false;
     else if (a === '--no-skill') opts.skill = false;
-    else if (a === '--graph-path') opts.graphPath = argv[++i];
-    else if (a === '--server-name') opts.serverName = argv[++i];
+    else if (a === '--graph-path') {
+      const value = argv[++i];
+      if (!value || value.startsWith('-')) fail('--graph-path requires a path');
+      opts.graphPath = value;
+    }
+    else if (a === '--server-name') {
+      const value = argv[++i];
+      if (!value || value.startsWith('-')) fail('--server-name requires a name');
+      opts.serverName = value;
+    }
     else if (a.startsWith('-')) fail('unknown flag: ' + a);
     else if (opts.target === null) opts.target = a;
     else fail('unexpected argument: ' + a);
@@ -240,6 +248,7 @@ function main() {
     fail('refusing to scaffold the template into itself — run this from your project directory.');
   }
   if (!fs.existsSync(target)) fail('target does not exist: ' + target);
+  if (!fs.statSync(target).isDirectory()) fail('target is not a directory: ' + target);
 
   console.log('\n' + c.bold('agentic-development-template') + ' -> ' + target);
   if (opts.dryRun) console.log(c.yellow('dry run — nothing will be written'));

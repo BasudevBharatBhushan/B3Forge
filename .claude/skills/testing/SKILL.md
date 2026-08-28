@@ -21,9 +21,9 @@ operational runbook for carrying them out. Where the two differ, that file wins.
 ## Runbook
 
 **1. Load the ticket.** Read `ai-workspace/active-ticket` for the pointer, then the
-ticket's resume header and §B6 Verification table. If there is no ticket, stop — there is
-nothing to test against. Ad-hoc test runs with no recorded expectation produce results
-nobody can act on later.
+ticket's resume header and applicable §B6 Verification or §M7 Module-Level Acceptance table.
+If there is no ticket, stop — there is nothing to test against. Ad-hoc test runs with no
+recorded expectation produce results nobody can act on later.
 
 The pointer file may carry a `PARENT: T-NNN (child M/N)` line. If the target ticket is a
 module **child**, run only its own B6 table — its parent's §M7 is not this run's business.
@@ -59,11 +59,12 @@ orchestrator before the re-run. The brief stays minimal — the failing case, th
 expectation. Not the ticket.
 
 **Hard cap: 3 fix cycles.** On the 4th failure, stop. Record the failing case and your
-diagnosis in §8 and hand it back. By the fourth attempt the defect is usually in the
-expected value or the requirement, not the code.
+diagnosis in §B7 Decisions & Blockers and hand it back. By the fourth attempt the defect is
+usually in the expected value or the requirement, not the code.
 
-**6. Record every outcome** in the ticket's Verification table — `PASS` / `FAIL` /
-`NOT RUN`, in place. No separate test-result file, no execution log.
+**6. Record every outcome** in the applicable table — B6 Verification for a child or M7
+Module-Level Acceptance for a parent — as `PASS` / `FAIL` / `NOT RUN`, in place. No
+separate test-result file, no execution log.
 
 **7. Report honestly.** A case that did not run — no harness, no env, no fixture — is
 `NOT RUN` with the reason. An accurate `NOT RUN` beats an implied coverage that does not
@@ -75,7 +76,7 @@ exist.
 
 Move to `COMPLETED` only when the sanity gate is green, every diff has been verified, and
 the requested cases pass. Anything unresolved stays `AWAITING_TEST` or goes `BLOCKED`, with
-the reason in §8.
+the reason in §B7 Decisions & Blockers.
 
 A module parent additionally requires its §M7 Module-Level Acceptance cases passing, or
 explicit developer approval to close without them. Children can reach `COMPLETED`
