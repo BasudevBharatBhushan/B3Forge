@@ -21,6 +21,7 @@ constraint, not something to invent around.
 | Repo topology | `<single-repo / monorepo / split-repo — see §9>` |
 | Packages | `<the top-level packages or apps, e.g. web, api, worker>` |
 | Scope types | `<the valid scope classifications for this project — see §3>` |
+| `Parallel isolation` | `<same-branch / branch-per-ticket / worktree-per-ticket — see §9>` |
 
 **Implementation agents** are fixed, not configurable here — `impl-small` and
 `impl-mid`, defined in `.claude/agents/`. Their `model:` frontmatter is what binds
@@ -63,11 +64,31 @@ non-goals, discovery, plan, subtasks, verification; write B first, compress into
 files — read first, body only when needed. Ticket **≤170 lines**. Update **in
 place**, never append (module parent's Deviation Log is the sole exception — a
 decision log, not a status journal). Discovery holds only plan-relevant findings.
+- **Context turns over; the ticket carries the state.** The window compacts
+automatically — never wind a subtask down early, skip verification, or thin a plan to
+save tokens. Keep the resume header true as each subtask closes, so a fresh window
+resumes from the ticket instead of reconstructing it.
+- **Three subtask states, not two.** `[ ]` not started · `[~]` dispatched, not yet
+verified · `[x]` gate green, diff read, committed. Write `[~]` and the resume header's
+`Current subtask:` line — `3 — dispatched (agent a7f3c2), unverified` — **before**
+dispatching, not after. Without it a dead session cannot distinguish never-started from
+half-done, and the agent ID that would have recovered the work is gone.
+- **Resuming — reconcile before acting.** `active-tickets` → the ticket's resume header
+→ `git log --oneline` and `git status` in the affected repo. The ticket records intent;
+git records what landed, and where they disagree **git wins**. A `[~]` row means an agent
+was mid-flight: in the same session (including one reopened with `--resume`) message it
+by its ID and it continues with full context; in a genuinely new session re-derive the
+brief from the file's current state — never re-send line numbers a half-applied edit has
+already moved.
 - **Status:** `TODO` → `IN_PROGRESS` → `AWAITING_TEST` → `COMPLETED` |
 `BLOCKED`. `AWAITING_TEST` means implementation verified, tests not yet run (§7).
-- **`ai-workspace/active-ticket` is a pointer, not a journal** — ≤6 lines (ID,
-path, status, current subtask, one blocker, and a 6th line `PARENT: T-NNN (child M/N)`
-only for a module child), **overwritten** on every status change, never appended.
+- **`ai-workspace/active-tickets` is an index, not a journal** — one row per in-flight ticket:
+ID, path, status, current subtask, claimed files (a module child adds its parent
+as `T-NNN (child M/N)`). **Rewritten whole** on every status change, never appended, and
+a row holds nothing that is not already in that ticket's resume header. **`COMPLETED`
+deletes the row** — the ticket file is the record. The file is bounded by what is in
+flight, never by how long the project has run: if it keeps growing, that is concurrency
+to question, not a file to trim.
 
 ## 3. Scope & Type Classification
 
@@ -101,6 +122,10 @@ scanning directories — call reference: `.agents/rules/graphify.md`. No graph y
 on anything about to be edited, for callers and dependents — prevents unintended
 breakage. `shortest_path` entry point → leaves for cross-cutting changes. Discovery
 completes **before** the plan is written; refresh the graph **once per ticket**.
+
+**The graph locates; it does not testify.** Never describe what code does, or write a
+plan step against it, from graph metadata, a filename, or a symbol name alone — open the
+file first. A path and an edge point at evidence; they are not the evidence.
 
 ## 5. Execution Is Always Subagentic
 
@@ -136,11 +161,22 @@ ticket; never just raise the model on the same brief without recording it.
 - **Partition by FILE** — one agent owns one file, or a file set no other agent
 touches; several subtasks in one file all go to that file's agent. Hard constraint:
 parallel agents sharing a file clobber each other silently.
+- **Across tickets the same rule holds.** A ticket's `Files:` header is its claim on
+those paths. Before dispatching into one ticket while another is in flight, check the
+claims in `active-tickets`: overlapping file sets mean the tickets serialize, or one gets
+re-planned. Agents in two different tickets clobber each other exactly as silently as two
+in the same one — the ticket boundary is not a lock.
 - **Foundation first** — shared helpers/modules others import run to completion
-before consumer edits fan out in parallel.
-- **The brief is minimal:** subtask text · exact paths and line numbers · the ticket's
-non-goals · its acceptance condition · "touch nothing else." Never paste the whole
-ticket, plan, or a graph dump into a subagent prompt.
+before consumer edits fan out.
+- **The brief is fixed and minimal** — the same five tagged fields every time, so bloat
+is visible at a glance. Never paste the whole ticket, plan, or a graph dump into it:
+  ```
+  <subtask>one change, one concern</subtask>
+  <targets>exact paths, with line numbers where known</targets>
+  <non_goals>copied from the ticket's B2, verbatim</non_goals>
+  <acceptance>the condition a read of the diff proves or disproves</acceptance>
+  <constraints>touch nothing else · run TYPECHECK_CMD · return the fixed block</constraints>
+  ```
 - **The return is fixed and compact**, no prose, no restating the plan:
   ```
   FILES: <paths touched>
@@ -150,10 +186,12 @@ ticket, plan, or a graph dump into a subagent prompt.
 - **Read the actual diff** before marking a subtask `[x]`. A subagent's claim that it
 did something is not evidence that it did.
 
-Constraints: one subtask dispatched and verified per response · only files listed in
-the ticket's plan · no new frameworks, unplanned refactors, or silent architecture
-changes · **never modify existing UI design without explicit developer approval** · if
-the plan is wrong, stop and revise the ticket rather than expanding scope mid-execution.
+Constraints: **one wave dispatched and verified per response** — a wave is one agent, or
+several whose file sets are disjoint; every diff in a wave is read and verified before the
+next wave is planned · only files listed in the ticket's plan · no new frameworks,
+unplanned refactors, or silent architecture changes · **never modify existing UI design
+without explicit developer approval** · if the plan is wrong, stop and revise the ticket
+rather than expanding scope mid-execution.
 
 ## 6. Sanity Gate — Automatic, Every Subtask
 
@@ -161,6 +199,15 @@ Cheap static checks during implementation. **Not** "testing"; never skipped or
 deferred. `TYPECHECK_CMD` in the affected package · `LINT_CMD` **scoped to the touched
 files** (never lint the whole repo for one file) · orchestrator reads the diff against
 the subtask's acceptance condition. No `[x]` until all three are clean.
+
+**Then commit — the gate's fourth step, not an optional extra.** `/rewind` does not
+restore subagent edits and does not track bash-driven changes, and this workflow puts
+every edit through a subagent. Git is the only recovery mechanism that covers the work,
+so a green gate ends in a commit inside the affected repo (§9), message
+`T-NNN.S — <what the subtask achieved>`, scoped to that subtask's files. Committing is
+local and reversible; **pushing is not, and needs approval** (§10). Start a ticket from
+a clean tree — a dirty one on arrival means stopping to ask, because otherwise nothing
+downstream can tell your changes from the ones already there.
 
 ## 7. Testing — On Explicit Request Only
 
@@ -181,6 +228,10 @@ that isn't there.
 3 fix cycles.** On the 4th failure, stop, record the failing case and diagnosis, hand
 it back — by then the problem is usually the specification. Record every outcome as
 `PASS` / `FAIL` / `NOT RUN`.
+- **The fix addresses the cause, never the assertion.** Do not edit, weaken, skip, or
+delete a case to reach green, and do not special-case the input it uses. A case you
+believe is wrong is a finding — record it and hand back. That is the 4th-failure
+outcome arriving early, not a way around it.
 - **Module-level testing.** For a `module-addition`, a child's `/testing` run covers
 only that child's B6 table; the parent's M7 Module-Level Acceptance runs via `/testing`
 on the parent ID, once every child is `AWAITING_TEST` or `COMPLETED`.
@@ -206,6 +257,16 @@ across repos from the parent · shared `ai-workspace/` lives at the parent, no n
 copies. **One authority.** A subdirectory's own rules/workflow doc is a *view* of this
 file; anything describing a superseded process carries a superseded banner.
 
+**Parallel tickets.** Declare `Parallel isolation` in §0. `same-branch` — concurrent
+tickets interleave commits on one branch; only sound when their file claims are disjoint,
+and reverting one ticket means picking its commits out by hand. `branch-per-ticket` — one
+branch per ticket, merged at closure, so each ticket stays revertible as a unit.
+`worktree-per-ticket` — a separate working directory per branch, so two sessions never
+share a tree; the strongest isolation and the only one that removes the file-claim hazard
+outright, at the cost of a checkout per ticket. Note that a worktree gets its own
+`ai-workspace/`: designate one tree (normally the primary checkout) as authoritative for
+the ticket registry rather than editing per-tree copies.
+
 ## 10. Standing Rules
 
 - **Communication.** Answer like a developer briefing a technical manager: outcome
@@ -215,6 +276,13 @@ only — files follow their templates, and §5's return format wins where they o
 - **Database.** Never CRUD a real database. Schema change → write SQL to
 `ai-workspace/sql/NNN_description.sql`, ask the developer to review and run it, then
 update `ai-workspace/docs/db-architecture.md`. Detail: `.agents/rules/database.md`.
+- **Irreversible and outward-facing actions.** Local, reversible work — editing files,
+running the sanity gate — proceeds unasked. Anything hard to undo or visible to other
+people stops for approval first: `git push --force`, `git reset --hard`, amending pushed
+commits, deleting branches or files you did not create, `rm -rf`, dropping tables, and
+anything that leaves the machine — pushing, opening or commenting on a PR, posting to an
+external service. Never route around an obstacle destructively: `--no-verify` and
+discarding unfamiliar working-tree changes are not fixes.
 - **API contracts.** Document every new or changed endpoint in
 `ai-workspace/docs/api/NNN_description.md` — body, params, query, headers, response
 shape, validation notes; never left undocumented. Keep the declared layer order
@@ -228,7 +296,8 @@ store UTC and convert at the edges — this bug class is silent and corrupts sto
 variable → stop and ask; the agent is not authorized to edit environment files.
 - **General.** Minimal safe changes, no cleanup beyond scope · keep backward
 compatibility unless told otherwise · no repo-wide changes without explicit approval
-· clarify ambiguity, never guess · scratch scripts in `temp/`, never the repo root.
+· clarify ambiguity, never guess · scratch scripts in `temp/`, never the repo root,
+deleted when the task ends.
 
 ## 11. Load On Demand
 
@@ -243,11 +312,13 @@ Never preload. Fetch by scope, only when needed. Missing doc → stop and ask.
 | `.agents/rules/timezone.md` | date/time logic involved |
 | `.agents/rules/graphify.md` | graph setup or advanced queries |
 | `.agents/templates/MODULE_TICKET_TEMPLATE.md` | Type classified as `module-addition` (§3) |
+| `.agents/templates/EXAMPLE_TICKET.md` | writing a first ticket, or unsure how much detail a section wants |
 | `.agents/rules/karpathy.md` | behavioral checklist before a large or ambiguous change |
+| `LESSONS.md` | a rule here looks like overhead, or you are about to weaken one |
 | `.agents/rules/rules.md` | auditing or extending the rules |
 | `.agents/workflows/workflow.md` | auditing or extending the workflow |
 | `ai-workspace/docs/db-architecture.md` | schema work |
-| `ai-workspace/active-ticket` | resuming in-progress work |
+| `ai-workspace/active-tickets` | resuming work, or checking what else is in flight |
 
 **Skills** — auto-discovered from `.claude/skills/<name>/SKILL.md`, each carrying
 out this workflow for one kind of task: `/testing` (the §7 trigger) · `/refactor`
@@ -255,3 +326,13 @@ out this workflow for one kind of task: `/testing` (the §7 trigger) · `/refact
 and fix) · `/module-addition`, `/feature-addition`, `/bug-fix`, `/enhancement`
 (the §3 Type taxonomy — discovery focus, ticket rigor, and non-goals specific to
 each). A skill that contradicts this file is wrong, not authoritative.
+
+## Compact Instructions
+
+Preserve verbatim when compacting: the §0 configuration table · this session's ticket ID,
+path, status, and `Current subtask:` line including any agent IDs · that ticket's
+non-goals · which subtasks stand at `[ ]`, `[~]`, and `[x]`.
+
+Summarize the rest freely. File contents already read, tool output, and narration of
+finished subtasks are all recoverable from the ticket and `git log` — they do not need
+to survive in the transcript.

@@ -24,10 +24,16 @@ for (let section = 0; section <= 11; section++) {
 }
 assert.ok(!manual.includes('§12'), 'CLAUDE.md must not reference a nonexistent §12');
 
-assertIncludes(manual, '≤6 lines', 'CLAUDE.md');
+assertIncludes(manual, 'one row per in-flight ticket', 'CLAUDE.md');
+assertIncludes(manual, 'Rewritten whole', 'CLAUDE.md');
+assert.ok(
+  !manual.includes('active-ticket ') && !manual.includes('`ai-workspace/active-ticket`'),
+  'CLAUDE.md must reference the active-tickets registry, not the old singular pointer'
+);
 for (const relative of ['README.md', 'SETUP.md', '.agents/rules/rules.md']) {
-  assertIncludes(read(relative), '≤6-line pointer', relative);
+  assertIncludes(read(relative).toLowerCase(), 'one row per in-flight ticket', relative);
 }
+assertIncludes(read('ai-workspace/active-tickets'), 'One row per in-flight ticket', 'active-tickets');
 
 const moduleTemplate = read('.agents/templates/MODULE_TICKET_TEMPLATE.md');
 assertIncludes(moduleTemplate, '## M7. Module-Level Acceptance', 'module ticket template');

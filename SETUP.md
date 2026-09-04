@@ -113,12 +113,11 @@ silently, and corrupts stored data, which then needs its own correction script.
 ## 5. Seed the workspace
 
 ```bash
-# ai-workspace/active-ticket — a ≤6-line pointer. Overwritten, never appended.
-Ticket: —
-Path: —
-Status: no active ticket
-Current subtask: —
-Blocker: —
+# ai-workspace/active-tickets — one row per in-flight ticket.
+# Rewritten whole, never appended. A COMPLETED ticket's row is deleted.
+| Ticket | Path | Status | Current subtask | Claimed files |
+|--------|------|--------|-----------------|---------------|
+| — | — | no tickets in flight | — | — |
 ```
 
 Fill in the scaffolds when you first need them:

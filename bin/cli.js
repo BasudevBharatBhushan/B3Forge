@@ -90,7 +90,7 @@ function usage() {
     '  CLAUDE.md             the operating manual (merged, never overwritten)',
     '  .agents/              rule and workflow reference docs, ticket templates',
     '  .claude/skills/       /testing, /refactor, /ui-responsiveness',
-    '  ai-workspace/         tickets, sql, docs, the active-ticket pointer',
+    '  ai-workspace/         tickets, sql, docs, the active-tickets registry',
     '  .mcp.json             the graphify MCP server, merged into any existing config',
     '  .gitignore            appends graphify-out/, temp/, tmp/ if absent',
     '',

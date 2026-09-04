@@ -37,11 +37,30 @@ themselves. It was read on every resume.
 Worse: the two copies drifted. Some notes existed *only* in `active-ticket`, so it could not
 safely be truncated — the very thing that would have fixed it was now blocked by it.
 
-**The rule.** The pointer is at most 5 lines and is **overwritten**, never appended.
-`CLAUDE.md` §2.
+**The rule.** The file is **rewritten whole**, never appended, and holds nothing that is
+not already in the tickets it points at. `CLAUDE.md` §2.
 
 **Corollary.** Any "just a small log" file trends toward becoming a database. If it grows
 monotonically and is read every session, it is a bug.
+
+**Refinement — the original rule over-corrected.** The first fix capped the file at a
+handful of lines covering *one* ticket. That made concurrent tickets impossible: two
+sessions overwrote each other's pointer, and the second ticket became invisible. But
+"one ticket" was never the lesson. Re-read the failure: the file broke because it grew
+**monotonically in time** and because it carried notes that existed nowhere else. A row
+per in-flight ticket breaks neither property — it is bounded by concurrency, it shrinks
+when a ticket closes, and every field in it is a copy of that ticket's resume header, so
+truncating it can never lose anything.
+
+The registry it became also carries each ticket's **file claims**, which turned out to
+matter more than the status column: lesson 4 (parallel agents on one file) applies just
+as well to agents in two different tickets, and the ticket boundary is not a lock. The
+index of what is in flight is the only place that hazard is visible before it happens.
+
+**The generalization.** When a rule blocks legitimate work, check whether the rule states
+the failure or merely one situation where the failure occurred. A cap on *lines* was a
+proxy; the real invariants were *bounded* and *non-duplicating*. Fix the proxy, keep the
+invariants.
 
 ---
 
@@ -225,6 +244,43 @@ Approving the plan approves the split. `CLAUDE.md` §5.
 
 ---
 
+## 14. The built-in undo does not cover subagent work
+
+**Not a production incident — a property of the harness**, found by reading the docs rather
+than by losing a day to it. It is recorded here because the rule it produces looks like
+ceremony until you know this, and §11 of the load table points here when a rule looks like
+overhead.
+
+Claude Code checkpoints every file edit and lets you rewind with `/rewind` or a double
+`Esc`. That safety net has two holes: it does not track files changed by bash commands, and
+**it does not restore edits made by a subagent**. The docs are explicit — *"rewinding
+doesn't restore the edits. Use git to revert them."*
+
+This workflow routes **every** edit through a subagent; the orchestrator has no Edit budget
+at all. So it opts out of checkpointing by construction. The undo button that appears to be
+there covers approximately none of the work this template produces.
+
+**The rules.**
+
+- The sanity gate ends in a commit. Green typecheck, green lint, diff read, **commit** —
+  one per subtask, in the affected repo. `CLAUDE.md` §6.
+- Commit locally, never push. Pushing is outward-facing and needs approval. §10.
+- Start a ticket from a clean tree, or stop and ask. Otherwise no later reader — human or
+  agent — can separate this ticket's changes from what was already sitting there.
+
+**The related mechanism, worth knowing before you delete a `[~]`.** Subagents *are*
+recoverable: each has an agent ID, a resumed subagent keeps its full history, and
+transcripts persist with the session, so an interrupted agent can be continued after a
+restart if the same session is resumed. But the ID is only knowable while the agent exists.
+Recording it after the agent returns is recording it exactly when it stopped mattering —
+hence `[~]` and the ID on the resume header *before* dispatch, not after.
+
+**The generalization.** A safety net you did not verify covers your case is worse than no
+safety net, because you stop building your own. Check what the tooling actually protects
+before designing around it.
+
+---
+
 ## Summary — the transferable principles
 
 1. **One artifact per task.** Anything else drifts and gets believed.
@@ -238,3 +294,4 @@ Approving the plan approves the split. `CLAUDE.md` §5.
 9. **Judge ≠ author.** The reviewer should not be the writer.
 10. **Be honest about what ran.** `NOT RUN` beats implied coverage.
 11. **Bind rules to mechanism.** A tier in prose is a label; a tier in frontmatter is a tier.
+12. **Verify what the safety net covers.** An undo that skips your whole execution path is not an undo. Commit, and let git be the checkpoint.

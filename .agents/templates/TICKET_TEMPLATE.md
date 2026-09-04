@@ -1,10 +1,14 @@
+<!-- Copy this file to ai-workspace/tickets/T-NNN-slug.md and fill it in.
+     For a filled-in ticket showing the intended depth of each section, see
+     .agents/templates/EXAMPLE_TICKET.md — read it once, do not copy it. -->
+
 # T-NNN: [Title]
 
 **Status:** TODO
 **Scope:** [scope type]
 **Type:** [module-addition | feature-addition | enhancement | bug-fix | refactor | migration | chore | security-fix]
 **Date:** YYYY-MM-DD
-**Current subtask:** —
+**Current subtask:** — <!-- while a wave is out: `3 — dispatched (agent a7f3c2), unverified` -->
 **Files:** `path/a`, `path/b`
 **Parent:** [T-NNN — delete this line entirely unless this ticket is a module component]
 **Depends on:** [T-NNN — delete this line entirely unless a sibling component must land first]
@@ -104,6 +108,11 @@ step maps to a line in A3 — the technical detail of that step, not a second su
 | 1 | [One change, one concern] | `path/a` | `impl-small` | [ ] |
 | 2 | [One change, one concern] | `path/b` | `impl-mid` | [ ] |
 
+**Done states:** `[ ]` not started · `[~]` dispatched, not yet verified · `[x]` gate
+green, diff read, committed. Set `[~]` and the header's `Current subtask:` line — with
+the agent ID — *before* dispatching. That ID is what recovers an interrupted subtask;
+lose it and the work has to be redone.
+
 **Tiers:** `impl-small` (Haiku) = mechanical single-site edit · `impl-mid` (Sonnet) =
 judgment, contracts, correctness reasoning · the orchestrator never implements, only
 dispatches and verifies. Model is set by `.claude/agents/<name>.md`, never by the dispatch
@@ -131,6 +140,7 @@ prompt — never pass a `model` override.
 - [ ] `TYPECHECK_CMD` clean in affected package(s)
 - [ ] `LINT_CMD` clean on touched files
 - [ ] Every diff read by the orchestrator against its subtask's acceptance condition
+- [ ] Each verified subtask committed as `T-NNN.S — <what it achieved>` (not pushed)
 
 ## B7. Decisions & Blockers
 
