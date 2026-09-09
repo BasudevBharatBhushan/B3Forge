@@ -45,9 +45,10 @@ identify customized files and preserve them.
 | `--no-mcp` | skip the `.mcp.json` entry |
 | `--graph-path <p>` | non-default `graph.json` location |
 
-Then fill in the **§0 Project Configuration** table at the top of `CLAUDE.md` — the
-typecheck, lint, and test commands, your repo topology, and your scope types. That table is
-what makes a stack-agnostic template executable.
+Then fill in the project configuration in the installed Claude adapter when you use Claude
+Code, and keep the shared rules in `AGENTS.md` / `.agentic/core/` as the cross-harness source.
+Record the real typecheck, lint, test commands, topology, and scope types; this is what makes
+the template executable rather than generic advice.
 
 Full checklist, including Graphify setup: **`SETUP.md`**.
 
@@ -89,10 +90,19 @@ matches and leaves all other files project-owned.
 ## What's in here
 
 ```
-CLAUDE.md                            The complete spec. Loaded every session. Start here.
-LESSONS.md                           What went wrong in production to produce each rule.
-SETUP.md                             Adoption checklist for a new project.
-bin/cli.js                           The npx scaffolder. Copies this tree into a project.
+AGENTS.md                            Universal project entry point.
+CLAUDE.md                            Claude Code adapter and tiered-agent details.
+CHANGELOG.md                         Released capability and migration history.
+CONTRIBUTING.md                      Contribution and lifecycle-safety guide.
+SECURITY.md                          Vulnerability reporting and scanner limits.
+bin/cli.js                           Project-local lifecycle manager.
+
+.agentic/
+  core/                              Canonical workflow, review contract, memory format
+  manifests/components.json          Profile/component inventory
+  hooks/                             Strict-profile advisory hook assets
+  packs/typescript/                  Optional TypeScript guidance
+  config.example.json                Strict-profile hook configuration example
 
 .agents/
   rules/
@@ -112,14 +122,24 @@ bin/cli.js                           The npx scaffolder. Copies this tree into a
     AGENTS_MD_TEMPLATE.md            Per-module AI quick-reference
 
 .claude/
-  skills/                            Task runbooks, invoked by name. Auto-discovered
+  agents/                            Implementers plus reviewer, security, build, research roles
+  skills/                            Claude-native task runbooks
     testing/                         /testing — the explicit test trigger
     refactor/                        /refactor — behavior-preserving restructuring
-    ui-responsiveness/               /ui-responsiveness — viewport audit and fixes
+    review/                          fresh-context evidence review
+    security-review/                 security-sensitive change review
+    build-fix/                       confirmed build/type/lint repair
+
+.codex/                              Capability-limited Codex adapter
+.cursor/                             Capability-limited Cursor adapter
+.github/
+  copilot-instructions.md            GitHub Copilot instructions
+  prompts/                           plan, review, security-review, build-fix prompts
 
 ai-workspace/
   active-tickets                     One row per in-flight ticket. Rewritten, never appended
   tickets/                           T-NNN-slug.md — one per task
+  lesson-candidates/                 Human-reviewed proposed lessons
   sql/                               Migrations for developer review. Never auto-executed
   docs/
     project-structure.md             Scaffold — fill in
@@ -127,8 +147,8 @@ ai-workspace/
     api/                             One doc per endpoint
 ```
 
-`CLAUDE.md` is self-sufficient: an agent with only that file has the whole workflow. The
-`.agents/` docs add depth and rationale, loaded on demand.
+`AGENTS.md` plus `.agentic/core/` is the shared workflow source. Harness adapters add only
+their platform-specific surface. The `.agents/` docs provide deeper rationale on demand.
 
 ---
 
