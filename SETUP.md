@@ -12,13 +12,13 @@ From your project root:
 npx agentic-development-template
 ```
 
-This writes `CLAUDE.md`, `.agents/`, `.claude/skills/`, and `ai-workspace/`, merges the
-graphify MCP server into `.mcp.json`, and appends `graphify-out/`, `temp/`, `tmp/` to
-`.gitignore`. Use `--dry-run` first if you want to see it before it writes.
+This writes the shared workflow, selected harness adapters, ticket workspace, and (for the
+default core profile) a Graphify MCP entry. It records installer-owned files in
+`.agentic/install-state.json`; use `--dry-run` first to preview every action.
 
 Nothing existing is overwritten. If your project already has a `CLAUDE.md`, it is left
-untouched and the template is written beside it as `CLAUDE.agentic.md` — merge its §0–§11
-in as your workflow section, keep your own project context, then delete it.
+untouched and reported as project-owned. Review the generated `AGENTS.md` and selected adapter
+assets, then explicitly merge any desired workflow additions.
 
 Prefer to copy by hand:
 
@@ -62,17 +62,17 @@ uv tool install graphifyy          # or: pip install graphifyy
 graphify --help                    # confirm the CLI resolves
 ```
 
-`npx agentic-development-template` already wrote the MCP server into `.mcp.json` and
-installed the `/graphify` skill if the CLI was on PATH. Restart Claude Code so it picks the
-server up, and approve it when prompted. If you installed graphify afterwards, re-run the
-scaffolder with `--force` so `.mcp.json` points at the right interpreter.
+The core profile writes a project-local Graphify MCP entry into `.mcp.json`. It prefers `uv`
+when available and otherwise uses the local Python command. Restart the chosen harness so it
+picks up the server, and use `agentic-init doctor .` to diagnose a missing Graphify/`uv`
+installation. Re-run `agentic-init update . --dry-run` before changing an existing setup.
 
 > Do **not** run `graphify claude install`. It injects its own graph-discovery section into
 > `CLAUDE.md` plus a PreToolUse hook, which duplicates §4 of the manual — two copies of one
-> rule is exactly the drift `LESSONS.md` warns about. The MCP server and the skill are what
-> you want; the CLAUDE.md section is already here.
+> rule is exactly the drift `LESSONS.md` warns about. The project-local MCP server and the
+> template's workflow instructions are what you want; the CLAUDE.md section is already here.
 
-Then invoke the `/graphify` skill on the repo to build the initial graph. It produces
+Then run Graphify on the repo to build the initial graph. It produces
 `graphify-out/graph.json`, an interactive `graph.html`, and `GRAPH_REPORT.md`.
 
 Keep it fresh — pick one:

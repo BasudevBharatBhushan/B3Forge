@@ -1,7 +1,7 @@
 {
   "name": "agentic-development-template",
-  "version": "0.1.0",
-  "description": "Drop-in agentic development workflow — ticket-driven, subagentic, graph-first. Scaffolds CLAUDE.md, rules, skills, and the graphify MCP server into a project.",
+  "version": "0.2.0",
+  "description": "Project-local, cross-harness workflow for AI-assisted development with safe installation lifecycle management.",
   "bin": {
     "agentic-init": "bin/cli.js"
   },
@@ -10,11 +10,19 @@
   },
   "files": [
     "bin",
+    ".agentic",
     ".agents",
     ".claude",
+    ".codex",
+    ".cursor",
+    ".github",
+    "AGENTS.md",
     "ai-workspace",
+    "CHANGELOG.md",
     "CLAUDE.md",
+    "CONTRIBUTING.md",
     "LESSONS.md",
+    "SECURITY.md",
     "SETUP.md"
   ],
   "engines": {
@@ -24,6 +32,9 @@
     "claude",
     "claude-code",
     "agentic",
+    "codex",
+    "cursor",
+    "copilot",
     "ai-workflow",
     "mcp",
     "graphify",

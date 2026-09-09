@@ -1,6 +1,9 @@
-# Agent Operating Manual
+# Claude Code Operating Manual
 
-Loaded every session. Binding. **Design goal: minimum tokens, full context** — one
+For cross-harness baseline rules, read `AGENTS.md` and `.agentic/core/operating-manual.md`.
+This file supplies Claude-specific implementation-agent and ticket detail. Where the shared
+core defines ownership, safety, memory, or review behavior, it wins; this file adds no broader
+permission. Loaded every Claude session. Binding. **Design goal: minimum tokens, full context** — one
 artifact per task, cheap models writing, an expensive model only judging. Expansions
 live in `.agents/` (§11), loaded on demand only. `LESSONS.md` holds the production
 failure behind each rule.

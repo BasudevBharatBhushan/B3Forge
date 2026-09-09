@@ -31,17 +31,18 @@ From your project root:
 npx github:KiBiz-Systems/agentic-development-template
 ```
 
-That writes `CLAUDE.md`, `.agents/`, `.claude/skills/`, and `ai-workspace/`, adds the
-graphify MCP server to `.mcp.json`, and appends `graphify-out/` to `.gitignore`. Existing
-files are never overwritten — an existing `CLAUDE.md` is left alone and the template lands
-beside it as `CLAUDE.agentic.md` to merge. Re-running is safe.
+The default `core` profile writes the shared workflow, selected harness adapters, ticket
+workspace, and an optional Graphify MCP entry. Existing files are never overwritten. Every file
+the installer creates is fingerprinted in `.agentic/install-state.json`, so future updates can
+identify customized files and preserve them.
 
 | Flag | |
 |---|---|
 | `--dry-run` | report what would happen, write nothing |
-| `--force` | overwrite existing files |
+| `--profile <minimal|core|strict>` | choose components; strict hooks require `--enable-hooks` |
+| `--harness <list>` | choose `claude`, `codex`, `cursor`, and/or `copilot` adapters |
+| `--all-harnesses` | install every supported adapter |
 | `--no-mcp` | skip the `.mcp.json` entry |
-| `--no-skill` | skip installing the graphify skill |
 | `--graph-path <p>` | non-default `graph.json` location |
 
 Then fill in the **§0 Project Configuration** table at the top of `CLAUDE.md` — the
@@ -49,6 +50,37 @@ typecheck, lint, and test commands, your repo topology, and your scope types. Th
 what makes a stack-agnostic template executable.
 
 Full checklist, including Graphify setup: **`SETUP.md`**.
+
+### Maintain an installed template
+
+```bash
+# Preview an upgrade. Nothing is written.
+agentic-init update . --dry-run
+
+# Apply only safe updates: untouched template files update; custom files are preserved.
+agentic-init update .
+
+# Preserve custom files and write proposed replacements beside them for review.
+agentic-init update . --write-conflicts
+
+agentic-init doctor .
+agentic-init repair . --dry-run
+agentic-init uninstall . --dry-run
+```
+
+These lifecycle commands require the local installation state. For a project created with an
+older version, preview `agentic-init adopt . --dry-run`; adoption records only exact template
+matches and leaves all other files project-owned.
+
+### Optional capabilities
+
+- Root `AGENTS.md` and `.agentic/core/` provide cross-harness workflow guidance.
+- Claude receives native agents and skills; Codex, Cursor, and Copilot receive explicit,
+  capability-limited project adapters.
+- `--profile strict --enable-hooks` adds advisory hook assets; it never enables global hooks or
+  external services automatically.
+- `agentic-init scan .` checks agent configuration for a small set of unsafe patterns.
+- `agentic-init handoff create --ticket T-001` creates an unreviewed local handoff.
 
 ---
 
