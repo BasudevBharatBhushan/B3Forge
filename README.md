@@ -54,24 +54,31 @@ Full checklist, including Graphify setup: **`SETUP.md`**.
 
 ### Maintain an installed template
 
+If you use the GitHub `npx` path above, use the same prefix for every lifecycle command. The
+installation state lives in your project; `npx` only supplies the CLI for that invocation.
+
 ```bash
 # Preview an upgrade. Nothing is written.
-agentic-init update . --dry-run
+npx github:KiBiz-Systems/agentic-development-template update . --dry-run
 
 # Apply only safe updates: untouched template files update; custom files are preserved.
-agentic-init update .
+npx github:KiBiz-Systems/agentic-development-template update .
 
 # Preserve custom files and write proposed replacements beside them for review.
-agentic-init update . --write-conflicts
+npx github:KiBiz-Systems/agentic-development-template update . --write-conflicts
 
-agentic-init doctor .
-agentic-init repair . --dry-run
-agentic-init uninstall . --dry-run
+npx github:KiBiz-Systems/agentic-development-template doctor .
+npx github:KiBiz-Systems/agentic-development-template repair . --dry-run
+npx github:KiBiz-Systems/agentic-development-template uninstall . --dry-run
 ```
 
 These lifecycle commands require the local installation state. For a project created with an
-older version, preview `agentic-init adopt . --dry-run`; adoption records only exact template
-matches and leaves all other files project-owned.
+older version, preview `npx github:KiBiz-Systems/agentic-development-template adopt .
+--dry-run`; adoption records only exact template matches and leaves all other files
+project-owned.
+
+If you deliberately install the package globally, `agentic-init <command>` is the equivalent
+short form. The GitHub `npx` path is the recommended default because it needs no global install.
 
 ### Optional capabilities
 
@@ -80,9 +87,11 @@ matches and leaves all other files project-owned.
   capability-limited project adapters.
 - `--profile strict --enable-hooks` adds advisory hook assets; it never enables global hooks or
   external services automatically.
-- `agentic-init scan .` checks agent configuration for a small set of unsafe patterns.
-- `agentic-init handoff create --ticket T-001` creates an unreviewed local handoff.
-- `agentic-init plan-view . --ticket T-001` serves a local-only ticket review page with
+- `npx github:KiBiz-Systems/agentic-development-template scan .` checks agent configuration for
+  a small set of unsafe patterns.
+- `npx github:KiBiz-Systems/agentic-development-template handoff create --ticket T-001` creates
+  an unreviewed local handoff.
+- `npx github:KiBiz-Systems/agentic-development-template plan-view . --ticket T-001` serves a local-only ticket review page with
   explicit approve/request-changes controls; the ticket Markdown remains canonical.
 
 ---
