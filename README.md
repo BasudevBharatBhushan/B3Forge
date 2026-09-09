@@ -81,6 +81,8 @@ matches and leaves all other files project-owned.
   external services automatically.
 - `agentic-init scan .` checks agent configuration for a small set of unsafe patterns.
 - `agentic-init handoff create --ticket T-001` creates an unreviewed local handoff.
+- `agentic-init plan-view . --ticket T-001` serves a local-only ticket review page with
+  explicit approve/request-changes controls; the ticket Markdown remains canonical.
 
 ---
 

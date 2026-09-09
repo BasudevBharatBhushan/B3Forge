@@ -5,12 +5,13 @@
 // familiar filename as proof of ownership.
 const crypto = require('crypto');
 const fs = require('fs');
+const http = require('http');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const STATE = '.agentic/install-state.json';
-const COMMANDS = new Set(['install', 'status', 'doctor', 'update', 'repair', 'uninstall', 'adopt', 'scan', 'handoff']);
+const COMMANDS = new Set(['install', 'status', 'doctor', 'update', 'repair', 'uninstall', 'adopt', 'scan', 'handoff', 'plan-view']);
 const PROFILES = new Set(['minimal', 'core', 'strict']);
 const HARNESSES = new Set(['claude', 'codex', 'cursor', 'copilot']);
 const BASE = ['.agents', '.agentic', 'ai-workspace', 'LESSONS.md', 'SETUP.md', 'AGENTS.md'];
@@ -47,7 +48,7 @@ function json(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } 
 function stable(value) { return value === undefined ? '__undefined__' : JSON.stringify(value, null, 2); }
 
 function args(argv) {
-  const result = { command: 'install', target: null, profile: 'core', harnesses: new Set(['claude']), dryRun: false, json: false, yes: false, writeConflicts: false, enableHooks: false, strict: false, mcp: undefined, graphPath: 'graphify-out/graph.json', serverName: 'graphify', format: 'text', ticket: null, handoffAction: null, help: false, version: false };
+  const result = { command: 'install', target: null, profile: 'core', harnesses: new Set(['claude']), dryRun: false, json: false, yes: false, writeConflicts: false, enableHooks: false, strict: false, mcp: undefined, graphPath: 'graphify-out/graph.json', serverName: 'graphify', format: 'text', ticket: null, port: 0, handoffAction: null, help: false, version: false };
   const positional = [];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]; const take = () => { const v = argv[++i]; if (!v || v.startsWith('-')) die(`${arg} requires a value`); return v; };
@@ -68,6 +69,7 @@ function args(argv) {
     else if (arg === '--server-name') result.serverName = take();
     else if (arg === '--format') result.format = take();
     else if (arg === '--ticket') result.ticket = take();
+    else if (arg === '--port') result.port = Number(take());
     else if (arg.startsWith('-')) die(`unknown flag: ${arg}`);
     else positional.push(arg);
   }
@@ -77,6 +79,7 @@ function args(argv) {
   if (positional.length) die(`unexpected argument: ${positional[0]}`);
   if (!PROFILES.has(result.profile)) die(`unknown profile: ${result.profile}`);
   if (!['text', 'json'].includes(result.format)) die(`unknown format: ${result.format}`);
+  if (!Number.isInteger(result.port) || result.port < 0 || result.port > 65535) die('--port must be an integer from 0 to 65535');
   for (const harness of result.harnesses) if (!HARNESSES.has(harness)) die(`unknown harness: ${harness}`);
   return result;
 }
@@ -87,10 +90,11 @@ function help() {
 Usage: agentic-init [install] [target] [options]
        agentic-init <status|doctor|update|repair|uninstall|adopt|scan> [target]
        agentic-init handoff <create|list|show> [target] --ticket <id>
+       agentic-init plan-view [target] --ticket <id> [--port <port>]
 
-Commands: install, status, doctor, update, repair, uninstall, adopt, scan, handoff
+Commands: install, status, doctor, update, repair, uninstall, adopt, scan, handoff, plan-view
 Options: --dry-run --profile minimal|core|strict --harness claude,codex,cursor,copilot
-         --all-harnesses --enable-hooks --strict --no-mcp --write-conflicts --yes --json
+         --all-harnesses --enable-hooks --strict --no-mcp --write-conflicts --yes --json --port
 
 Use update --dry-run before update. Modified and unknown files are always preserved.`);
 }
@@ -287,10 +291,43 @@ function handoff(target, options) {
   const header = fs.readFileSync(path.join(tickets, match), 'utf8').split(/^---\s*$/m)[0].trim(); const name = `${id}-${new Date().toISOString().slice(0, 10)}.md`; const content = `---\nformat: agentic-memory-v1\nstatus: proposed\nscope: ticket\ncreated: ${new Date().toISOString()}\nsourceTicket: ${id}\ntags: [handoff]\ntrust: unreviewed\n---\n\n# Handoff: ${id}\n\n## Evidence\n\n${header}\n\n## Reuse guidance\n\nReview the source ticket and current git state before continuing.\n\n## Verification needed\n\nConfirm ticket status, claimed files, and actual working-tree state.\n`;
   if (options.dryRun) console.log(`CREATE    .agentic/memory/${name} — proposed handoff`); else { write(within(target, `.agentic/memory/${name}`), content); console.log(`Created .agentic/memory/${name}`); }
 }
+function ticketFile(target, id) {
+  if (!id) die('plan-view requires --ticket <ticket-id>');
+  const directory = path.join(target, 'ai-workspace', 'tickets');
+  if (!present(directory)) die('ticket directory is missing');
+  const name = fs.readdirSync(directory).find((entry) => entry.startsWith(id) && entry.endsWith('.md'));
+  if (!name) die(`ticket not found: ${id}`);
+  return path.join(directory, name);
+}
+function html(value) { return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function planView(target, options) {
+  const file = ticketFile(target, options.ticket);
+  const render = (notice = '') => {
+    const ticket = fs.readFileSync(file, 'utf8');
+    return `<!doctype html><html><head><meta charset="utf-8"><title>Plan review</title><style>body{font:16px system-ui;margin:2rem;max-width:960px;background:#111;color:#eee}pre{white-space:pre-wrap;background:#1b1b1b;padding:1rem;border-radius:.5rem}button{padding:.55rem .8rem;margin-right:.5rem}.ok{color:#9f9}</style></head><body><h1>Plan review: ${html(options.ticket)}</h1>${notice ? `<p class="ok">${html(notice)}</p>` : ''}<form method="post" action="/decision"><button name="decision" value="APPROVED">Approve plan</button><button name="decision" value="CHANGES REQUESTED">Request changes</button></form><p>This loopback-only viewer updates the ticket's <code>Plan approval</code> field. The Markdown ticket remains canonical.</p><pre>${html(ticket)}</pre></body></html>`;
+  };
+  const server = http.createServer((request, response) => {
+    if (request.method === 'GET' && request.url === '/') { response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); return response.end(render()); }
+    if (request.method === 'POST' && request.url === '/decision') {
+      let body = ''; request.on('data', (chunk) => { body += chunk; }); request.on('end', () => {
+        const decision = new URLSearchParams(body).get('decision');
+        if (!['APPROVED', 'CHANGES REQUESTED'].includes(decision)) { response.writeHead(400); return response.end('invalid decision'); }
+        const source = fs.readFileSync(file, 'utf8');
+        const line = `**Plan approval:** ${decision}`;
+        const next = /^\*\*Plan approval:\*\*.*$/m.test(source) ? source.replace(/^\*\*Plan approval:\*\*.*$/m, line) : source.replace(/^(\*\*Status:\*\*.*)$/m, `$1\n${line}`);
+        write(file, next); response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); response.end(render(`Plan marked ${decision}.`));
+      }); return;
+    }
+    response.writeHead(404); response.end('not found');
+  });
+  server.listen(options.port, '127.0.0.1', () => {
+    const address = server.address(); console.log(`Plan viewer: http://127.0.0.1:${address.port}/`); console.log('Loopback-only. Press Ctrl+C to stop.');
+  });
+}
 function main() {
   const options = args(process.argv.slice(2)); if (options.help) return help(); if (options.version) return console.log(require(path.join(ROOT, 'package.json')).version);
   const target = path.resolve(options.target || process.cwd()); if (!present(target) || !fs.statSync(target).isDirectory()) die(`target directory does not exist: ${target}`);
   if (target === path.resolve(ROOT) && options.command !== 'scan') die('refusing to scaffold the template into itself');
-  if (options.command === 'install') return install(target, options); if (options.command === 'update') return install(target, options, true); if (options.command === 'status') return report(target, options); if (options.command === 'doctor') return report(target, options, true); if (options.command === 'repair') return repair(target, options); if (options.command === 'uninstall') return uninstall(target, options); if (options.command === 'adopt') return adopt(target, options); if (options.command === 'scan') return scan(target, options); return handoff(target, options);
+  if (options.command === 'install') return install(target, options); if (options.command === 'update') return install(target, options, true); if (options.command === 'status') return report(target, options); if (options.command === 'doctor') return report(target, options, true); if (options.command === 'repair') return repair(target, options); if (options.command === 'uninstall') return uninstall(target, options); if (options.command === 'adopt') return adopt(target, options); if (options.command === 'scan') return scan(target, options); if (options.command === 'plan-view') return planView(target, options); return handoff(target, options);
 }
 try { main(); } catch (error) { console.error(`error: ${error.message}`); process.exitCode = error.code || 1; }
