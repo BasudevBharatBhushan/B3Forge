@@ -28,7 +28,7 @@ looser version of it failed. `LESSONS.md` records exactly how.
 From your project root:
 
 ```bash
-npx github:KiBiz-Systems/agentic-development-template
+npx github:BasudevBharatBhushan/B3Forge
 ```
 
 The default `core` profile writes the shared workflow, selected harness adapters, ticket
@@ -59,21 +59,21 @@ installation state lives in your project; `npx` only supplies the CLI for that i
 
 ```bash
 # Preview an upgrade. Nothing is written.
-npx github:KiBiz-Systems/agentic-development-template update . --dry-run
+npx github:BasudevBharatBhushan/B3Forge update . --dry-run
 
 # Apply only safe updates: untouched template files update; custom files are preserved.
-npx github:KiBiz-Systems/agentic-development-template update .
+npx github:BasudevBharatBhushan/B3Forge update .
 
 # Preserve custom files and write proposed replacements beside them for review.
-npx github:KiBiz-Systems/agentic-development-template update . --write-conflicts
+npx github:BasudevBharatBhushan/B3Forge update . --write-conflicts
 
-npx github:KiBiz-Systems/agentic-development-template doctor .
-npx github:KiBiz-Systems/agentic-development-template repair . --dry-run
-npx github:KiBiz-Systems/agentic-development-template uninstall . --dry-run
+npx github:BasudevBharatBhushan/B3Forge doctor .
+npx github:BasudevBharatBhushan/B3Forge repair . --dry-run
+npx github:BasudevBharatBhushan/B3Forge uninstall . --dry-run
 ```
 
 These lifecycle commands require the local installation state. For a project created with an
-older version, preview `npx github:KiBiz-Systems/agentic-development-template adopt .
+older version, preview `npx github:BasudevBharatBhushan/B3Forge adopt .
 --dry-run`; adoption records only exact template matches and leaves all other files
 project-owned.
 
@@ -87,11 +87,11 @@ short form. The GitHub `npx` path is the recommended default because it needs no
   capability-limited project adapters.
 - `--profile strict --enable-hooks` adds advisory hook assets; it never enables global hooks or
   external services automatically.
-- `npx github:KiBiz-Systems/agentic-development-template scan .` checks agent configuration for
+- `npx github:BasudevBharatBhushan/B3Forge scan .` checks agent configuration for
   a small set of unsafe patterns.
-- `npx github:KiBiz-Systems/agentic-development-template handoff create --ticket T-001` creates
+- `npx github:BasudevBharatBhushan/B3Forge handoff create --ticket T-001` creates
   an unreviewed local handoff.
-- `npx github:KiBiz-Systems/agentic-development-template plan-view . --ticket T-001` serves a local-only ticket review page with
+- `npx github:BasudevBharatBhushan/B3Forge plan-view . --ticket T-001` serves a local-only ticket review page with
   explicit approve/request-changes controls; the ticket Markdown remains canonical.
 
 ---

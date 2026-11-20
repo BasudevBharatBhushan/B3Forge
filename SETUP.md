@@ -23,8 +23,8 @@ assets, then explicitly merge any desired workflow additions.
 Prefer to copy by hand:
 
 ```bash
-git clone https://github.com/KiBiz-Systems/agentic-development-template.git
-cd agentic-development-template
+git clone https://github.com/BasudevBharatBhushan/B3Forge.git
+cd B3Forge
 cp -r CLAUDE.md LESSONS.md .agents .claude ai-workspace /path/to/your-project/
 ```
 
