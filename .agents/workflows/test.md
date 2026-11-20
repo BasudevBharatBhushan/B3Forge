@@ -6,7 +6,7 @@ description: The explicit request to run tests. Tests are never run otherwise.
 # Run Tests
 
 **Invoking this file IS the explicit request to test.** Tests are not run at any other time —
-see `CLAUDE.md` §7. What runs during implementation instead is the sanity gate (§6).
+see `CLAUDE.md` Hard Rules and `.claude/skills/testing/SKILL.md`. What runs during implementation instead is the sanity gate (`CLAUDE.md` Hard Rules).
 
 ---
 

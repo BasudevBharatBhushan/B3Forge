@@ -19,6 +19,19 @@ classify -> discover -> ticket -> developer approval -> implement -> sanity gate
 7. Use a fresh, read-only reviewer for non-trivial or risk-bearing changes.
 8. Run full tests only when requested by the developer or explicitly required by the approved ticket.
 
+## On-demand procedures
+
+Detailed procedures are plain files; read them when the step applies (Claude Code also
+auto-loads them as skills). Do not duplicate their text here.
+
+- Writing or editing a ticket: `.claude/skills/ticket/SKILL.md`
+- Before writing a plan: `.claude/skills/discovery/SKILL.md`
+- Before dispatching an agent: `.claude/skills/dispatch/SKILL.md`
+- Resuming in-flight work: `.claude/skills/resume/SKILL.md`
+- Running requested tests: `.claude/skills/testing/SKILL.md`
+- Before marking `COMPLETED`: `.claude/skills/close-ticket/SKILL.md`
+- Split repos or parallel tickets: `.agents/rules/topology.md`
+
 ## Safety
 
 - Never overwrite, delete, or claim a project file based on its name alone.

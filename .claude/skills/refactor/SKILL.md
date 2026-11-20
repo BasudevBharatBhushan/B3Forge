@@ -71,7 +71,7 @@ sides of the change:
 | No coverage exists | Write the characterization case against the **current** behavior *before* refactoring, so it can fail if you break something |
 | Pure structural move, typed language | Sanity gate + orchestrator diff read may be sufficient — say so explicitly in the table |
 
-Cases stay `NOT RUN` until the developer asks (§7). The sanity gate still runs on every
+Cases stay `NOT RUN` until the developer asks (`/testing`). The sanity gate still runs on every
 subtask, and here it matters more than usual: `TYPECHECK_CMD` across the **whole affected
 package**, not just the touched files, because the point of the change is that other files
 depend on what moved.

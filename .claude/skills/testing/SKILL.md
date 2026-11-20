@@ -8,6 +8,9 @@ description: Run the tests for the active ticket. Confirms the harness exists, r
 `.agents/workflows/test.md` is authoritative for the testing rules. This skill is the
 operational runbook for carrying them out. Where the two differ, that file wins.
 
+Cases are authored at plan time and left `NOT RUN`; the ticket sits at `AWAITING_TEST` until
+this skill is invoked. The sanity gate guards correctness meanwhile.
+
 ## Usage
 
 ```
@@ -32,7 +35,7 @@ table, and only once every child is `AWAITING_TEST` or `COMPLETED`; if any child
 there yet, stop and say which.
 
 **2. Confirm the harness.** Check the `CLAUDE.md` §0 config block for the command each case
-needs. If it is `NONE`, that case is `NOT RUN` with the reason — wiring a harness is its
+needs. If `API_TEST_CMD` is `NONE`, say so in the ticket; that case is `NOT RUN` with the reason — wiring a harness is its
 own approved task. **Never invent a test command, and never substitute a nearby script that
 looks like one.**
 
@@ -44,15 +47,23 @@ before running anything.
 gap appears, add the row to the ticket's table, say so out loud, then run it.
 
 Use the lowest layer that can prove the behavior:
-`pure function → logic unit → service → API → browser (last resort)`.
-Browser/E2E needs explicit developer approval *and* a stated reason the behavior cannot be
-asserted functionally.
+`pure function → state/logic unit → service → API → browser (last resort)`.
+`UNIT_TEST_CMD` covers pure functions, logic units, and component/state behavior;
+`API_TEST_CMD` covers endpoint behavior and cross-layer flows. A dry run (typecheck plus
+diff read) covers static or aesthetic changes only. Browser/E2E is avoided: it needs
+explicit developer approval *and* a stated reason the behavior cannot be asserted
+functionally.
 
 **5. Loop on failure.**
 
 ```
 run → diagnose → fix (dispatch `impl-small` or `impl-mid`) → re-run
 ```
+
+**The fix addresses the cause, never the assertion.** Do not edit, weaken, skip, or delete a
+case to reach green, and do not special-case the input it uses. A case you believe is wrong
+is a finding — record it and hand back; that is the 4th-failure outcome arriving early, not
+a way around it.
 
 Fixes follow the normal execution rules: delegated, partitioned by file, diff read by the
 orchestrator before the re-run. The brief stays minimal — the failing case, the file, the

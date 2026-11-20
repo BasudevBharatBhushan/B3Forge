@@ -12,7 +12,7 @@ description: Full mandatory-rules reference. The condensed, binding version is C
 
 ## Context loading
 
-Load on demand, by scope. Never preload. See `CLAUDE.md` §11 for the table.
+Load on demand, by scope. Never preload. See `CLAUDE.md` "Load On Demand" for the table.
 
 Before deep file exploration, query the knowledge graph (`.agents/rules/graphify.md`)
 rather than scanning directories. The graph locates; it does not testify — never describe
