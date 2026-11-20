@@ -33,6 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.isLocalOnly = isLocalOnly;
 exports.desired = desired;
 exports.source = source;
 exports.commandExists = commandExists;
@@ -45,7 +46,14 @@ const node_child_process_1 = require("node:child_process");
 const constants_1 = require("./constants");
 const fs_safe_1 = require("./fs-safe");
 const state_1 = require("./state");
+/** Local, untracked content a dev checkout may contain under .claude/; never installed. */
+function isLocalOnly(relative) {
+    const clean = relative.replace(/\\/g, '/').replace(/^\.\//, '');
+    return clean === '.claude/worktrees' || clean.startsWith('.claude/worktrees/') || clean === '.claude/settings.local.json';
+}
 function sourceFiles(relative, output = []) {
+    if (isLocalOnly(relative))
+        return output;
     const src = path.join(constants_1.ROOT, relative);
     if (!(0, fs_safe_1.present)(src))
         return output;

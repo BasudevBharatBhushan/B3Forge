@@ -6,7 +6,13 @@ import { digest, json, present, safeRelative, stable, within } from './fs-safe';
 import { statusOf } from './state';
 import type { Action, FileRecord, InstallState, McpServerValue, Options } from './types';
 
+/** Local, untracked content a dev checkout may contain under .claude/; never installed. */
+export function isLocalOnly(relative: string): boolean {
+  const clean = relative.replace(/\\/g, '/').replace(/^\.\//, '');
+  return clean === '.claude/worktrees' || clean.startsWith('.claude/worktrees/') || clean === '.claude/settings.local.json';
+}
 function sourceFiles(relative: string, output: string[] = []): string[] {
+  if (isLocalOnly(relative)) return output;
   const src = path.join(ROOT, relative); if (!present(src)) return output;
   if (fs.statSync(src).isFile()) { const clean = safeRelative(relative); if (clean !== STATE) output.push(clean); return output; }
   for (const name of fs.readdirSync(src)) sourceFiles(path.join(relative, name), output);
