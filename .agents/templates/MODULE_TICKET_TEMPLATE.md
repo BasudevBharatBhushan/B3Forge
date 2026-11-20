@@ -96,7 +96,7 @@ re-opens approval for that child only, never blocking siblings already in flight
 
 [End-to-end scenario(s) spanning more than one component — the thing no single child's
 Verification table can prove alone. Authored at plan time, run only on explicit test
-request, same rule as §7. Record each outcome here; M7 is the parent's Verification table.]
+request, same rule as `/testing`. Record each outcome here; M7 is the parent's Verification table.]
 
 | # | Tool | Case | Expected | Result |
 |---|------|------|----------|--------|

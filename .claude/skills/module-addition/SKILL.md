@@ -23,7 +23,7 @@ conventions, it is not this — use `/feature-addition` instead.
 **Read the source document once, carefully, right now.** The parent ticket
 (`MODULE_TICKET_TEMPLATE.md`) is the last time anyone should need to open it. Anything
 under-distilled into M2–M4 becomes a re-read tax paid by every child ticket downstream —
-see `CLAUDE.md` §2. Precise wording, formulas, or schemas that can't be safely paraphrased
+see `/ticket`. Precise wording, formulas, or schemas that can't be safely paraphrased
 get quoted directly into the ticket, not summarized.
 
 ---
@@ -41,7 +41,7 @@ get quoted directly into the ticket, not summarized.
    measures against later.
 4. **Component Manifest (M5)** — one row per component: Child | Component | Purpose |
    Files / area | Depends on | Tier bias | Status. This table *is* the subtask partition at
-   the module level, same principle as §5's "partition by file," one level up. The
+   the module level, same principle as the "partition by file" rule (`/dispatch`), one level up. The
    `Files / area` cell must name the component's actual files or area — it's what that
    child's Deviation Check measures against, so a vague or missing cell makes the check
    unenforceable.
@@ -50,14 +50,14 @@ get quoted directly into the ticket, not summarized.
    Verification table can prove alone.
 
 Present the parent ticket for **one approval.** Approving the Component Manifest approves
-every child's plan — see `CLAUDE.md` §1.
+every child's plan — see `CLAUDE.md` Hard Rules.
 
 ---
 
 ## Running the children
 
 Spin up child tickets (`T-NNN.1-slug.md`, plain `TICKET_TEMPLATE.md`, `Parent:` set) in
-dependency order from Sequencing (M6). **Each child runs the normal §1–§7 loop untouched —
+dependency order from Sequencing (M6). **Each child runs the normal workflow loop untouched —
 this skill governs the handoff between children, not what happens inside one.**
 
 Before a child's subtasks dispatch, its Deviation Check (child ticket's B3) must pass:

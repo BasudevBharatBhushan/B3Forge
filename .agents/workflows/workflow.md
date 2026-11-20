@@ -8,6 +8,10 @@ description: Full workflow reference. The condensed, binding version is CLAUDE.m
 > examples. It does not introduce rules that `CLAUDE.md` lacks. If they disagree, `CLAUDE.md`
 > wins and this file is the bug.
 
+On-demand procedure files (single source for each; Codex/Cursor/Copilot read them as plain
+files): `.claude/skills/ticket/SKILL.md`, `discovery`, `dispatch`, `resume`, `testing`,
+`close-ticket` (same path pattern), and `.agents/rules/topology.md`.
+
 Design goal: **minimum token consumption with full context.**
 
 ---
@@ -236,7 +240,7 @@ sets of agents on one working tree, and nothing about being in separate tickets 
 apart. A ticket's `Files:` header is its claim; `active-tickets` lists every claim in
 flight. Check it before dispatching. Overlapping claims mean the tickets serialize, or one
 is re-planned to a disjoint file set — or the project moves to `worktree-per-ticket`
-isolation (§0), which is the only option that removes the hazard rather than managing it.
+isolation (`CLAUDE.md` §0), which is the only option that removes the hazard rather than managing it.
 
 **Sequencing — one wave per response.** A wave is a single agent, or several whose file
 sets are disjoint. Dispatch the wave, read and verify every diff in it, and only then plan

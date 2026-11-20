@@ -66,7 +66,7 @@ Transform tasks into verifiable conditions:
 
 Write the corresponding **test case** into the ticket's Verification table at plan time, and
 leave it `NOT RUN`. **Do not write or run test files unless the developer asks** — see
-`CLAUDE.md` §7. The sanity gate (§6) plus a read diff is what verifies work in the meantime.
+`CLAUDE.md` Hard Rules. The sanity gate plus a read diff is what verifies work in the meantime.
 
 For multi-step work, the ticket's subtask table already carries this: one row per change, one
 acceptance condition each.

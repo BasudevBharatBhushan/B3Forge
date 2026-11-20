@@ -41,7 +41,7 @@ pattern where an existing one already fits.**
 - Prefer extending an existing structure over introducing a new one. A genuinely new
   pattern inside an existing module is a signal to re-check whether this is actually
   `module-addition` scope creep — flag it rather than plowing ahead.
-- Tier per the normal test (`CLAUDE.md` §5): if the shape is copied from a sibling almost
+- Tier per the normal test (`/dispatch`): if the shape is copied from a sibling almost
   verbatim, it's `impl-small`; if the sibling's pattern doesn't quite fit and needs
   judgment to adapt, it's `impl-mid`.
 
@@ -58,5 +58,5 @@ pattern where an existing one already fits.**
 ## Verification
 
 New capability needs new cases proving it exists, at the lowest layer that can prove it
-(`CLAUDE.md` §7). If the feature touches a shared component or shared data path, add one
+(`/testing`). If the feature touches a shared component or shared data path, add one
 regression case proving existing behavior is unchanged.

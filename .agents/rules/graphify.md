@@ -11,7 +11,7 @@ scanning directories, and it surfaces relationships text search cannot — inclu
 edges between documentation concepts and the code that implements them.
 
 Graph discovery is **required** before the plan section of a ticket is written
-(`CLAUDE.md` §4). If the graph does not exist yet, building it is a setup task — not a
+(`.claude/skills/discovery/SKILL.md`). If the graph does not exist yet, building it is a setup task — not a
 licence to skip discovery.
 
 ---
@@ -118,7 +118,7 @@ graphify benchmark                # measure token reduction vs. reading the full
 graphify save-result              # save a Q&A back into graphify-out/memory for feedback
 ```
 
-For a split-repo topology (see `CLAUDE.md` §9), `merge-graphs` gives you one graph spanning
+For a split-repo topology (see `.agents/rules/topology.md`), `merge-graphs` gives you one graph spanning
 all repos, so `shortest_path` can trace a call chain across the boundary.
 
 ---
