@@ -15,3 +15,7 @@ tmp/
 Thumbs.db
 .idea/
 .vscode/
+
+# Compiled tests
+.test-dist/
+node_modules/

@@ -113,6 +113,7 @@ function desired(options) {
   if (options.harnesses.has('copilot')) roots.push('.github');
   const files = new Set(); for (const root of roots) for (const file of sourceFiles(root)) files.add(file);
   if (options.profile !== 'strict') for (const file of [...files]) if (file.startsWith('.agentic/hooks/')) files.delete(file);
+  for (const file of [...files]) if (file.startsWith('.github/workflows/')) files.delete(file);
   return [...files].sort();
 }
 function source(relative) { return fs.readFileSync(within(ROOT, relative)); }

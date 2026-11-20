@@ -1,21 +1,25 @@
 {
-  "name": "agentic-development-template",
+  "name": "b3forge",
   "version": "0.2.0",
   "description": "Project-local, cross-harness workflow for AI-assisted development with safe installation lifecycle management.",
   "bin": {
     "agentic-init": "bin/cli.js"
   },
   "scripts": {
-    "test": "node test/conformance.js"
+    "build:test": "tsc -p test/tsconfig.json",
+    "typecheck": "tsc -p test/tsconfig.json --noEmit",
+    "test": "tsc -p test/tsconfig.json && node --test \".test-dist/*.test.js\""
   },
   "files": [
     "bin",
     ".agentic",
     ".agents",
     ".claude",
+    "!.claude/worktrees",
     ".codex",
     ".cursor",
     ".github",
+    "!.github/workflows",
     "AGENTS.md",
     "ai-workspace",
     "CHANGELOG.md",
@@ -26,7 +30,7 @@
     "SETUP.md"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=22"
   },
   "keywords": [
     "claude",
@@ -44,5 +48,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BasudevBharatBhushan/B3Forge.git"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "5.9.3"
   }
 }
