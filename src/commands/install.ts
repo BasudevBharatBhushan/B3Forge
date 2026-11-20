@@ -19,6 +19,8 @@ export function install(target: string, options: Options, update = false): void 
   const plan = plannedFiles(target, effective, existing); const current = existing || createState(effective, plan.records);
   const actions = [...plan.actions, ...[mcpPlan(target, effective, current), ...ignorePlan(target, current)].flatMap((a) => a ? [a] : [])];
   show(actions, options); apply(target, actions, options, current, plan.records);
+  // plan.records is a shallow copy of existing.files; carry its refreshed fingerprints into the saved state.
+  current.files = plan.records;
   if (!options.dryRun) { current.template.version = packageJson().version; current.template.installedAt = new Date().toISOString(); save(target, current, options); }
   console.log(options.dryRun ? '\nDry run — no files changed.' : '\nCompleted safely. Run `agentic-init doctor .` for diagnostics.');
 }

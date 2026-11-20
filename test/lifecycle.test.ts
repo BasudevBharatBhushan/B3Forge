@@ -41,11 +41,10 @@ test('update refreshes an untouched file whose recorded template version is stal
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /UPDATE\s+LESSONS\.md/);
   assert.equal(read(dir, 'LESSONS.md'), fs.readFileSync(path.join(root, 'LESSONS.md'), 'utf8'));
-  // BUG: update writes the new template content but does not persist the new fingerprint
-  // (plan.records is a shallow copy of state.files, so apply() updates the copy only). The
-  // recorded hash stays stale, so the freshly updated file then reads as "modified".
-  assert.equal(readState(dir).files['LESSONS.md'].installedSha256, sha(stale));
-  assert.match(run(['status', dir, '--json']).stdout, /"modified": \[\s*"LESSONS\.md"/);
+  // The recorded fingerprint is refreshed, so the updated file reads as unchanged.
+  assert.equal(readState(dir).files['LESSONS.md'].installedSha256, sha(fs.readFileSync(path.join(root, 'LESSONS.md'))));
+  const status = JSON.parse(run(['status', dir, '--json']).stdout) as { modified: string[] };
+  assert.deepEqual(status.modified, []);
 });
 
 test('update --dry-run reports the update but writes nothing', () => {

@@ -25,6 +25,8 @@ function install(target, options, update = false) {
     const actions = [...plan.actions, ...[(0, plan_1.mcpPlan)(target, effective, current), ...(0, plan_1.ignorePlan)(target, current)].flatMap((a) => a ? [a] : [])];
     (0, actions_1.show)(actions, options);
     (0, actions_1.apply)(target, actions, options, current, plan.records);
+    // plan.records is a shallow copy of existing.files; carry its refreshed fingerprints into the saved state.
+    current.files = plan.records;
     if (!options.dryRun) {
         current.template.version = (0, constants_1.packageJson)().version;
         current.template.installedAt = new Date().toISOString();
