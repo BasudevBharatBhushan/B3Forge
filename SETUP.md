@@ -161,11 +161,22 @@ time an agent has to orient in that module.
 filled in), so `update` preserves it and does not replace it. To move to the new one:
 
 1. Requires Node 22 or newer.
-2. Run `npx github:BasudevBharatBhushan/B3Forge update . --write-conflicts`. Your files stay as
-   they are; the new `CLAUDE.md` is written beside yours for review.
-3. Copy your §0 table values (commands, topology, packages, scope types) into the new file,
-   then replace your `CLAUDE.md` with it.
-4. Run `npx github:BasudevBharatBhushan/B3Forge doctor .` to confirm the state is clean.
+2. Preview first: `npx github:BasudevBharatBhushan/B3Forge update . --dry-run`. Nothing is
+   written; each file is listed as UPDATE, PRESERVE, CONFLICT, etc.
+3. Run `npx github:BasudevBharatBhushan/B3Forge update . --write-conflicts`. Untouched template
+   files are updated. Every file you edited — not only `CLAUDE.md` — stays as it is, and the
+   new version is written beside it as `<name>.agentic-new` (e.g. `CLAUDE.md.agentic-new`).
+4. Copy your §0 table values (commands, topology, packages, scope types) into
+   `CLAUDE.md.agentic-new`, then replace your `CLAUDE.md` with it. Review the other
+   `.agentic-new` files the same way, and delete each one once merged.
+5. Run `npx github:BasudevBharatBhushan/B3Forge doctor .` to check the installation.
+
+Never had B3Forge installed (no `.agentic/install-state.json`)? Run the plain install instead.
+An existing `CLAUDE.md` is left untouched and the B3Forge version is written as
+`CLAUDE.agentic.md`; add the line `@CLAUDE.agentic.md` to your `CLAUDE.md` (or merge the two)
+so Claude Code reads it. Any other file that already exists is skipped, with no copy written.
+A project set up by an older template version can run `adopt . --dry-run` instead, to record
+the files that exactly match the template.
 
 Also new in 0.3:
 
