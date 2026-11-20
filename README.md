@@ -1,10 +1,17 @@
-# Agentic Development Template
+# B3Forge
 
 A drop-in workflow for AI-assisted software development, tuned for **minimum token
 consumption with full context**.
 
 Stack-agnostic. Battle-tested — every rule here came from a production codebase where the
 looser version of it failed. `LESSONS.md` records exactly how.
+
+Measured: the always-loaded `CLAUDE.md` is now **7,131 bytes (~1,800 tokens)** per session,
+down from 22,351 bytes (~5,500 tokens) in 0.2. Procedures load on demand as skills:
+`/ticket`, `/discovery`, `/dispatch`, `/resume`, `/close-ticket`, `/testing`, plus one skill
+per ticket type. Safety rules stay in `CLAUDE.md`; skills only add procedure.
+
+Requires Node 22 or newer.
 
 ---
 
@@ -68,6 +75,7 @@ npx github:BasudevBharatBhushan/B3Forge update .
 npx github:BasudevBharatBhushan/B3Forge update . --write-conflicts
 
 npx github:BasudevBharatBhushan/B3Forge doctor .
+npx github:BasudevBharatBhushan/B3Forge validate .
 npx github:BasudevBharatBhushan/B3Forge repair . --dry-run
 npx github:BasudevBharatBhushan/B3Forge uninstall . --dry-run
 ```
@@ -76,6 +84,8 @@ These lifecycle commands require the local installation state. For a project cre
 older version, preview `npx github:BasudevBharatBhushan/B3Forge adopt .
 --dry-run`; adoption records only exact template matches and leaves all other files
 project-owned.
+
+Upgrading from 0.2? See "Migrating from 0.2" in `SETUP.md`.
 
 If you deliberately install the package globally, `agentic-init <command>` is the equivalent
 short form. The GitHub `npx` path is the recommended default because it needs no global install.
@@ -89,10 +99,35 @@ short form. The GitHub `npx` path is the recommended default because it needs no
   external services automatically.
 - `npx github:BasudevBharatBhushan/B3Forge scan .` checks agent configuration for
   a small set of unsafe patterns.
+- `npx github:BasudevBharatBhushan/B3Forge validate .` checks that the AI followed the ticket
+  process (see below).
 - `npx github:BasudevBharatBhushan/B3Forge handoff create --ticket T-001` creates
   an unreviewed local handoff.
 - `npx github:BasudevBharatBhushan/B3Forge plan-view . --ticket T-001` serves a local-only ticket review page with
   explicit approve/request-changes controls; the ticket Markdown remains canonical.
+
+### The Behavior Book
+
+`ai-workspace/behavior/` holds the project's current behavior as plain rules, one file per
+area, each rule written as `WHEN ... THEN ...`. It starts empty. Every ticket declares its
+behavior changes in section B7, you approve them with the plan, and `/close-ticket` merges
+them into the book. `/discovery` reads the relevant area before planning, so the AI starts
+from what the system is supposed to do, not from a guess. Format: `ai-workspace/behavior/README.md`.
+
+### Validate
+
+```bash
+npx github:BasudevBharatBhushan/B3Forge validate .                  # every ticket + the book
+npx github:BasudevBharatBhushan/B3Forge validate . --ticket T-007   # one ticket
+```
+
+`validate` checks that the AI followed the ticket process. It does not test your app. It
+checks ticket headers and statuses, the size limits, that every subtask names `impl-small` or
+`impl-mid`, that B7 is present, that COMPLETED tickets are fully checked off, out of
+`active-tickets`, and merged into the behavior book, that `active-tickets` matches the real
+tickets, and that behavior rules have a WHEN and a THEN and unique names. It warns when two
+in-flight tickets claim the same file. Exit code 0 is clean, 1 means errors, 2 means bad
+usage. `/close-ticket` runs it before marking a ticket COMPLETED.
 
 ---
 
@@ -100,11 +135,15 @@ short form. The GitHub `npx` path is the recommended default because it needs no
 
 ```
 AGENTS.md                            Universal project entry point.
-CLAUDE.md                            Claude Code adapter and tiered-agent details.
+CLAUDE.md                            Slim always-loaded Claude adapter (~1,800 tokens).
 CHANGELOG.md                         Released capability and migration history.
 CONTRIBUTING.md                      Contribution and lifecycle-safety guide.
 SECURITY.md                          Vulnerability reporting and scanner limits.
-bin/cli.js                           Project-local lifecycle manager.
+bin/cli.js                           Entry point (`b3forge`, alias `agentic-init`).
+src/                                 TypeScript source for the CLI and hooks.
+dist/                                Compiled output; committed, CI fails on drift.
+test/                                Black-box CLI and docs-budget tests.
+docs/plans/                          Implementation plans, including v0.3.
 
 .agentic/
   core/                              Canonical workflow, review contract, memory format
@@ -123,6 +162,7 @@ bin/cli.js                           Project-local lifecycle manager.
     timezone.md                      Client-supplied-timezone policy
     graphify.md                      Knowledge-graph setup and tool reference
     karpathy.md                      Behavioral checklist — assumptions, simplicity, surgical diffs
+    topology.md                      Single-repo / monorepo / split-repo guidance
   workflows/
     workflow.md                      Full workflow reference with rationale
     test.md                          The explicit test trigger
@@ -132,12 +172,15 @@ bin/cli.js                           Project-local lifecycle manager.
 
 .claude/
   agents/                            Implementers plus reviewer, security, build, research roles
-  skills/                            Claude-native task runbooks
+  skills/                            Claude-native runbooks, loaded on demand
+    ticket/ discovery/ dispatch/     /ticket, /discovery, /dispatch
+    resume/ close-ticket/            /resume, /close-ticket (runs validate)
     testing/                         /testing — the explicit test trigger
+    bug-fix/ feature-addition/ enhancement/ module-addition/ ui-responsiveness/
+                                     type skills, one per ticket type
     refactor/                        /refactor — behavior-preserving restructuring
-    review/                          fresh-context evidence review
-    security-review/                 security-sensitive change review
-    build-fix/                       confirmed build/type/lint repair
+    review/ security-review/         fresh-context review; security-sensitive changes
+    build-fix/ research/ lesson-review/
 
 .codex/                              Capability-limited Codex adapter
 .cursor/                             Capability-limited Cursor adapter
@@ -148,6 +191,7 @@ bin/cli.js                           Project-local lifecycle manager.
 ai-workspace/
   active-tickets                     One row per in-flight ticket. Rewritten, never appended
   tickets/                           T-NNN-slug.md — one per task
+  behavior/                          Behavior book: WHEN/THEN rules per area, filled ticket by ticket
   lesson-candidates/                 Human-reviewed proposed lessons
   sql/                               Migrations for developer review. Never auto-executed
   docs/

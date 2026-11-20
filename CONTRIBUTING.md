@@ -7,10 +7,14 @@ permanent policy.
 ## Development
 
 ```bash
-npm test
+npm ci
+# edit src/ (never dist/ by hand)
+npm test          # builds first, then runs the suite
 node bin/cli.js --help
 node bin/cli.js install <temporary-project> --dry-run
 ```
+
+Commit the rebuilt `dist/` together with your `src/` change; CI fails if `dist/` drifts from a fresh build.
 
 Never test lifecycle commands in a real project without first using `--dry-run`. New installer
 behavior must preserve a pre-existing `CLAUDE.md`, unknown files, custom `.mcp.json` entries,
