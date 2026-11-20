@@ -1,0 +1,5 @@
+# One row per in-flight ticket.
+
+| Ticket | Path | Status | Current subtask | Claimed files |
+|--------|------|--------|-----------------|---------------|
+| T-001 | ai-workspace/tickets/T-001-x.md | IN_PROGRESS | — | `src/a.ts` |

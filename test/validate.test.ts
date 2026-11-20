@@ -133,3 +133,48 @@ test('ticket-state hook is quiet on a consistent project', () => {
   writeFile(dir, 'ai-workspace/active-tickets', '| Ticket | Path | Status | Current subtask | Claimed files |\n|---|---|---|---|---|\n| — | — | no tickets in flight | — | — |\n');
   assert.equal(hook('ticket-state', dir).level, 'info');
 });
+
+const closing = (name: string): string => path.join(fixtures, 'closing', name);
+
+test('--closing passes a fully merged ticket even though its registry row still exists', () => {
+  assert.equal(run(['validate', closing('good'), '--ticket', 'T-001', '--closing']).status, 0);
+});
+
+test('--closing fails on an open subtask', () => {
+  const r = run(['validate', closing('open-subtask'), '--ticket', 'T-001', '--closing']);
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /unfinished subtask 2/);
+});
+
+test('--closing fails when B7 is not merged into the book yet', () => {
+  const r = run(['validate', closing('b7-not-merged'), '--ticket', 'T-001', '--closing']);
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /is not in behavior\/auth\.md/);
+});
+
+test('without --closing the same in-flight ticket is not held to completion checks', () => {
+  assert.equal(run(['validate', closing('b7-not-merged'), '--ticket', 'T-001']).status, 0);
+});
+
+test('legacy 0.2 ticket gets one warning, B7 checks skipped, exit 0', () => {
+  const r = run(['validate', path.join(fixtures, 'legacy', 'good')]);
+  assert.equal(r.status, 0, r.stdout);
+  const lines = r.stdout.split('\n').filter((l) => l.includes('legacy ticket (pre-0.3 format): B7/behavior-book checks skipped'));
+  assert.equal(lines.length, 1);
+  assert.match(lines[0], /^ai-workspace\/tickets\/T-001-old\.md:1  warning  /);
+  assert.doesNotMatch(r.stdout, /  error  /);
+});
+
+test('legacy tickets still get the non-B7 checks', () => {
+  const r = run(['validate', path.join(fixtures, 'legacy', 'bad-agent')]);
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /Agent "impl-huge"/);
+});
+
+test('validate bad usage exits 2: unknown flag, extra positional, --closing without --ticket', () => {
+  assert.equal(run(['validate', good, '--bogus']).status, 2);
+  assert.equal(run(['validate', good, 'extra']).status, 2);
+  assert.equal(run(['validate', good, '--closing']).status, 2);
+  assert.equal(run(['validate', good, '--ticket']).status, 2);
+  assert.equal(run(['scan', good, '--bogus']).status, 1, 'other commands keep exit 1');
+});

@@ -62,7 +62,7 @@ function parseTicket(text) {
     const raw = text.split(/\r?\n/);
     const totalLines = raw.length && raw[raw.length - 1] === '' ? raw.length - 1 : raw.length;
     const lines = stripComments(text);
-    const ticket = { totalLines, title: null, header: {}, partA: null, subtasks: [], b7: null };
+    const ticket = { totalLines, title: null, header: {}, partA: null, subtasks: [], b7: null, legacy: false };
     const titleAt = lines.findIndex((l) => /^# T-\d/.test(l));
     if (titleAt >= 0) {
         const m = lines[titleAt].match(/^# (T-\d+(?:\.\d+)?)\s*:?\s*(.*)$/);
@@ -140,6 +140,7 @@ function parseTicket(text) {
         }
         ticket.b7 = b7;
     }
+    ticket.legacy = lines.some((l) => /^##\s+B7\.?\s*Decisions/i.test(l)) && !lines.some((l) => /^##\s.*Behavior changes/i.test(l));
     return ticket;
 }
 /** `active-tickets` rows. Header, separator and the "— no tickets in flight" placeholder are skipped. */

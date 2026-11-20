@@ -50,6 +50,8 @@ const key = (name) => name.trim().replace(/\s+/g, ' ').toLowerCase();
 const areaSlug = (area) => area.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const firstWord = (value, re) => (value.match(re) || [''])[0];
 function validate(target, options) {
+    if (options.closing && !options.ticket)
+        (0, fs_safe_1.die)('--closing requires --ticket <id>', 2);
     const workspace = path.join(target, 'ai-workspace');
     if (!(0, fs_safe_1.present)(workspace))
         (0, fs_safe_1.die)('no ai-workspace/ directory in target; nothing to validate', 2);
@@ -81,6 +83,8 @@ function validate(target, options) {
         const id = (0, parse_1.ticketIdOf)(name);
         const t = (0, parse_1.parseTicket)(fs.readFileSync(file, 'utf8'));
         const parent = 'Children' in t.header; // a module-addition parent has its own header and no B5/B7
+        if (t.legacy)
+            add(file, 1, 'warning', 'legacy ticket (pre-0.3 format): B7/behavior-book checks skipped');
         const err = (line, message) => add(file, line, 'error', message);
         // Header
         for (const field of parent ? REQUIRED_PARENT : REQUIRED)
@@ -107,7 +111,7 @@ function validate(target, options) {
                 err(s.line, `subtask ${s.id} has an unrecognized Done marker (use [ ], [~] or [x])`);
         }
         // B7
-        if (!parent) {
+        if (!parent && !t.legacy) {
             if (!t.b7)
                 err(1, 'missing section "## B7. Behavior changes"');
             else {
@@ -118,14 +122,15 @@ function validate(target, options) {
             }
         }
         // Completion
-        if (status === 'COMPLETED') {
+        if (status === 'COMPLETED' || options.closing) {
             for (const s of t.subtasks)
                 if (s.state === ' ' || s.state === '~')
                     err(s.line, `COMPLETED ticket has unfinished subtask ${s.id}`);
-            for (const row of registry)
-                if (row.ticket === id)
-                    add(registryFile, row.line, 'error', `COMPLETED ticket ${id} is still in active-tickets`);
-            for (const e of t.b7 ? t.b7.entries : []) {
+            if (!options.closing)
+                for (const row of registry)
+                    if (row.ticket === id)
+                        add(registryFile, row.line, 'error', `COMPLETED ticket ${id} is still in active-tickets`);
+            for (const e of t.b7 && !t.legacy ? t.b7.entries : []) {
                 if (!e.area) {
                     err(e.line, `B7 rule "${e.rule}" has no **Area:** line`);
                     continue;

@@ -171,9 +171,12 @@ Also new in 0.3:
 
 - Ticket sections are renumbered: new tickets get **B7 Behavior changes**, and the old B7
   "Decisions & Blockers" is now **B8**. Existing tickets keep their old numbering; leave them.
+  `validate` reports one warning per such ticket ("legacy ticket (pre-0.3 format)") and skips
+  its B7 and behavior-book checks; all other checks still apply.
 - The behavior book (`ai-workspace/behavior/`) starts empty and fills in ticket by ticket.
   Do not backfill it up front.
-- `validate` is available to check tickets against the process.
+- `validate` is available to check tickets against the process; `/close-ticket` runs
+  `validate . --ticket <id> --closing` before a ticket is marked COMPLETED.
 
 ---
 

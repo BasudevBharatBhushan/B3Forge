@@ -20,6 +20,8 @@ export interface Ticket {
   partA: PartA | null;
   subtasks: Subtask[];
   b7: B7Section | null;
+  /** Pre-0.3 format: B7 is "Decisions & Blockers" and there is no behavior-changes section. */
+  legacy: boolean;
 }
 export interface RegistryRow { ticket: string; path: string; status: string; subtask: string; claimed: string[]; line: number }
 export interface BehaviorRule { name: string; line: number; hasWhen: boolean; hasThen: boolean }
@@ -40,7 +42,7 @@ export function parseTicket(text: string): Ticket {
   const raw = text.split(/\r?\n/);
   const totalLines = raw.length && raw[raw.length - 1] === '' ? raw.length - 1 : raw.length;
   const lines = stripComments(text);
-  const ticket: Ticket = { totalLines, title: null, header: {}, partA: null, subtasks: [], b7: null };
+  const ticket: Ticket = { totalLines, title: null, header: {}, partA: null, subtasks: [], b7: null, legacy: false };
 
   const titleAt = lines.findIndex((l) => /^# T-\d/.test(l));
   if (titleAt >= 0) { const m = lines[titleAt].match(/^# (T-\d+(?:\.\d+)?)\s*:?\s*(.*)$/); if (m) ticket.title = { id: m[1], text: m[2], line: titleAt + 1 }; }
@@ -92,6 +94,7 @@ export function parseTicket(text: string): Ticket {
     }
     ticket.b7 = b7;
   }
+  ticket.legacy = lines.some((l) => /^##\s+B7\.?\s*Decisions/i.test(l)) && !lines.some((l) => /^##\s.*Behavior changes/i.test(l));
   return ticket;
 }
 

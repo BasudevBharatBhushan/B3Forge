@@ -6,7 +6,7 @@
 
 - Behavior book (`ai-workspace/behavior/`): the project's current behavior as WHEN/THEN rules, merged in ticket by ticket.
 - Ticket section B7 "Behavior changes", approved with the plan.
-- `validate` command: checks tickets, `active-tickets`, and the behavior book against the ticket process; `--ticket T-NNN` checks one. Exit 0 clean, 1 errors, 2 bad usage. `/close-ticket` runs it before COMPLETED.
+- `validate` command: checks tickets, `active-tickets`, and the behavior book against the ticket process; `--ticket T-NNN` checks one, and `--closing` (with `--ticket`) checks it as if COMPLETED. Tickets from 0.2 get a single "legacy ticket" warning and skip B7/behavior-book checks. Exit 0 no errors (warnings allowed), 1 errors, 2 bad usage or unknown ticket. `/close-ticket` runs `--closing` after merging B7, before COMPLETED.
 - Skills `/ticket`, `/discovery`, `/dispatch`, `/resume`, `/close-ticket`; `.agents/rules/topology.md`.
 - `b3forge` bin alias (`agentic-init` kept).
 - Black-box CLI test suite and CI.
@@ -28,7 +28,7 @@
 ### Migration
 
 - Run `update . --write-conflicts`, copy your §0 values into the new `CLAUDE.md`, and replace yours. See "Migrating from 0.2" in `SETUP.md`.
-- Existing tickets keep their old numbering; new tickets use the new one.
+- Existing tickets keep their old numbering; new tickets use the new one. `validate` warns on old tickets and skips their B7 checks.
 
 ## 0.2.0 — 2026-09-09
 

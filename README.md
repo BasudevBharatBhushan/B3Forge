@@ -119,6 +119,7 @@ from what the system is supposed to do, not from a guess. Format: `ai-workspace/
 ```bash
 npx github:BasudevBharatBhushan/B3Forge validate .                  # every ticket + the book
 npx github:BasudevBharatBhushan/B3Forge validate . --ticket T-007   # one ticket
+npx github:BasudevBharatBhushan/B3Forge validate . --ticket T-007 --closing   # as if COMPLETED
 ```
 
 `validate` checks that the AI followed the ticket process. It does not test your app. It
@@ -126,8 +127,13 @@ checks ticket headers and statuses, the size limits, that every subtask names `i
 `impl-mid`, that B7 is present, that COMPLETED tickets are fully checked off, out of
 `active-tickets`, and merged into the behavior book, that `active-tickets` matches the real
 tickets, and that behavior rules have a WHEN and a THEN and unique names. It warns when two
-in-flight tickets claim the same file. Exit code 0 is clean, 1 means errors, 2 means bad
-usage. `/close-ticket` runs it before marking a ticket COMPLETED.
+in-flight tickets claim the same file. Tickets from 0.2 (no behavior section) get one warning
+and skip the B7 and behavior-book checks. Each problem prints as
+`<path>:<line>  <error|warning>  <message>`, followed by a summary line; `--json` prints the
+same data as JSON. Exit code 0 means no errors (warnings are allowed), 1 means errors, 2 means
+bad usage or an unknown ticket. `--closing` (needs `--ticket`) checks the ticket as if it were
+COMPLETED, ignoring its `active-tickets` row; `/close-ticket` runs it after merging B7 and
+before marking the ticket COMPLETED.
 
 ---
 

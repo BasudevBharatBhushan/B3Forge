@@ -14,6 +14,7 @@ export interface Options {
   serverName: string;
   format: string;
   ticket: string | null;
+  closing: boolean;
   port: number;
   handoffAction: string | null;
   help: boolean;

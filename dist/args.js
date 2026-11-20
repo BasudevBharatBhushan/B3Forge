@@ -5,12 +5,14 @@ exports.help = help;
 const constants_1 = require("./constants");
 const fs_safe_1 = require("./fs-safe");
 function parseArgs(argv) {
-    const result = { command: 'install', target: null, profile: 'core', harnesses: new Set(['claude']), dryRun: false, json: false, yes: false, writeConflicts: false, enableHooks: false, strict: false, mcp: undefined, graphPath: 'graphify-out/graph.json', serverName: 'graphify', format: 'text', ticket: null, port: 0, handoffAction: null, help: false, version: false };
+    const result = { command: 'install', target: null, profile: 'core', harnesses: new Set(['claude']), dryRun: false, json: false, yes: false, writeConflicts: false, enableHooks: false, strict: false, mcp: undefined, graphPath: 'graphify-out/graph.json', serverName: 'graphify', format: 'text', ticket: null, closing: false, port: 0, handoffAction: null, help: false, version: false };
     const positional = [];
+    // `validate` reports bad usage as exit 2 (documented); other commands keep exit 1.
+    const usageCode = argv.find((x) => !x.startsWith('-')) === 'validate' ? 2 : 1;
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i];
         const take = () => { const v = argv[++i]; if (!v || v.startsWith('-'))
-            (0, fs_safe_1.die)(`${arg} requires a value`); return v; };
+            (0, fs_safe_1.die)(`${arg} requires a value`, usageCode); return v; };
         if (arg === '-h' || arg === '--help')
             result.help = true;
         else if (arg === '-v' || arg === '--version')
@@ -19,6 +21,8 @@ function parseArgs(argv) {
             result.dryRun = true;
         else if (arg === '--json')
             result.json = true;
+        else if (arg === '--closing')
+            result.closing = true;
         else if (arg === '--yes')
             result.yes = true;
         else if (arg === '--write-conflicts')
@@ -47,7 +51,7 @@ function parseArgs(argv) {
         else if (arg === '--port')
             result.port = Number(take());
         else if (arg.startsWith('-'))
-            (0, fs_safe_1.die)(`unknown flag: ${arg}`);
+            (0, fs_safe_1.die)(`unknown flag: ${arg}`, usageCode);
         else
             positional.push(arg);
     }
@@ -58,7 +62,7 @@ function parseArgs(argv) {
     if (positional.length)
         result.target = positional.shift();
     if (positional.length)
-        (0, fs_safe_1.die)(`unexpected argument: ${positional[0]}`);
+        (0, fs_safe_1.die)(`unexpected argument: ${positional[0]}`, result.command === 'validate' ? 2 : 1);
     if (!constants_1.PROFILES.has(result.profile))
         (0, fs_safe_1.die)(`unknown profile: ${result.profile}`);
     if (!['text', 'json'].includes(result.format))
@@ -77,7 +81,7 @@ Usage: agentic-init [install] [target] [options]
        agentic-init <status|doctor|update|repair|uninstall|adopt|scan> [target]
        agentic-init handoff <create|list|show> [target] --ticket <id>
        agentic-init plan-view [target] --ticket <id> [--port <port>]
-       agentic-init validate [target] [--ticket <id>]
+       agentic-init validate [target] [--ticket <id> [--closing]]
 
 Commands: install, status, doctor, update, repair, uninstall, adopt, scan, handoff, plan-view, validate
 Options: --dry-run --profile minimal|core|strict --harness claude,codex,cursor,copilot

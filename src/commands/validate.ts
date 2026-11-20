@@ -20,6 +20,7 @@ const areaSlug = (area: string): string => area.trim().toLowerCase().replace(/[^
 const firstWord = (value: string, re: RegExp): string => (value.match(re) || [''])[0];
 
 export function validate(target: string, options: Options): void {
+  if (options.closing && !options.ticket) die('--closing requires --ticket <id>', 2);
   const workspace = path.join(target, 'ai-workspace');
   if (!present(workspace)) die('no ai-workspace/ directory in target; nothing to validate', 2);
   const rel = (file: string): string => path.relative(target, file).split(path.sep).join('/');
@@ -47,6 +48,7 @@ export function validate(target: string, options: Options): void {
     const file = path.join(ticketsDir, name); const id = ticketIdOf(name);
     const t: Ticket = parseTicket(fs.readFileSync(file, 'utf8'));
     const parent = 'Children' in t.header; // a module-addition parent has its own header and no B5/B7
+    if (t.legacy) add(file, 1, 'warning', 'legacy ticket (pre-0.3 format): B7/behavior-book checks skipped');
     const err = (line: number, message: string): void => add(file, line, 'error', message);
 
     // Header
@@ -68,7 +70,7 @@ export function validate(target: string, options: Options): void {
     }
 
     // B7
-    if (!parent) {
+    if (!parent && !t.legacy) {
       if (!t.b7) err(1, 'missing section "## B7. Behavior changes"');
       else {
         if (t.b7.none !== null && type !== 'refactor' && type !== 'chore') err(t.b7.none, `"None — no behavior change" is only allowed for refactor and chore tickets (Type is ${type || 'unknown'})`);
@@ -77,10 +79,10 @@ export function validate(target: string, options: Options): void {
     }
 
     // Completion
-    if (status === 'COMPLETED') {
+    if (status === 'COMPLETED' || options.closing) {
       for (const s of t.subtasks) if (s.state === ' ' || s.state === '~') err(s.line, `COMPLETED ticket has unfinished subtask ${s.id}`);
-      for (const row of registry) if (row.ticket === id) add(registryFile, row.line, 'error', `COMPLETED ticket ${id} is still in active-tickets`);
-      for (const e of t.b7 ? t.b7.entries : []) {
+      if (!options.closing) for (const row of registry) if (row.ticket === id) add(registryFile, row.line, 'error', `COMPLETED ticket ${id} is still in active-tickets`);
+      for (const e of t.b7 && !t.legacy ? t.b7.entries : []) {
         if (!e.area) { err(e.line, `B7 rule "${e.rule}" has no **Area:** line`); continue; }
         const area = book.get(areaSlug(e.area));
         const exists = !!area && area.rules.some((r) => key(r.name) === key(e.rule));
