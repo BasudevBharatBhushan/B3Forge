@@ -53,6 +53,11 @@ VERIFICATION GAPS: checks not run and why
 OUT-OF-SCOPE CHANGES: path and reason
 ```
 
+## Behavior book
+
+`ai-workspace/behavior/` holds the current behavior contract per area. Read the affected
+area's file before planning; each ticket's B7 section is merged into it at close.
+
 ## Memory and lessons
 
 `.agentic/memory/` contains portable, unreviewed local notes. Verify important claims against

@@ -103,3 +103,12 @@ test('skills do not reference nonexistent section 8', () => {
     assert.ok(!read(relative).includes('§8'), `${relative} must not reference nonexistent §8`);
   }
 });
+
+test('behavior book: README, B7 template section, no PHASE 3 placeholders', () => {
+  assert.ok(fs.existsSync(path.join(root, 'ai-workspace/behavior/README.md')));
+  assert.ok(read('.agents/templates/TICKET_TEMPLATE.md').includes('## B7. Behavior changes'));
+  assert.ok(read('.agents/templates/EXAMPLE_TICKET.md').includes('## B7. Behavior changes'));
+  for (const skill of ['close-ticket', 'discovery']) {
+    assert.ok(!read(`.claude/skills/${skill}/SKILL.md`).includes('PHASE 3'), `${skill} still has a PHASE 3 placeholder`);
+  }
+});

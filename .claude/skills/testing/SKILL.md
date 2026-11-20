@@ -70,7 +70,7 @@ orchestrator before the re-run. The brief stays minimal — the failing case, th
 expectation. Not the ticket.
 
 **Hard cap: 3 fix cycles.** On the 4th failure, stop. Record the failing case and your
-diagnosis in §B7 Decisions & Blockers and hand it back. By the fourth attempt the defect is
+diagnosis in §B8 Decisions & Blockers and hand it back. By the fourth attempt the defect is
 usually in the expected value or the requirement, not the code.
 
 **6. Record every outcome** in the applicable table — B6 Verification for a child or M7
@@ -87,7 +87,7 @@ exist.
 
 Move to `COMPLETED` only when the sanity gate is green, every diff has been verified, and
 the requested cases pass. Anything unresolved stays `AWAITING_TEST` or goes `BLOCKED`, with
-the reason in §B7 Decisions & Blockers.
+the reason in §B8 Decisions & Blockers.
 
 A module parent additionally requires its §M7 Module-Level Acceptance cases passing, or
 explicit developer approval to close without them. Children can reach `COMPLETED`

@@ -7,7 +7,10 @@ description: Discovery before writing a plan. Graph-first querying (Graphify), g
 
 Discovery completes **before** the plan is written.
 
-1. <!-- PHASE 3: behavior book read goes here -->
+1. **Read the behavior book.** For each affected area, read `ai-workspace/behavior/<area>.md`
+   before planning; it is the current contract. Code that disagrees with it is a finding to
+   record in Discovery, not an assumption to resolve. No file yet → note that, and the
+   ticket's B7 will create it.
 2. **Query the graph before any exploration.** The project keeps a Graphify knowledge graph;
    query it instead of scanning directories, and use returned paths to target reads. Call
    reference: `.agents/rules/graphify.md`. No graph yet → building it is a setup task, not a

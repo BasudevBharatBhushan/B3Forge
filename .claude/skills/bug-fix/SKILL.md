@@ -29,7 +29,7 @@ happens to make the symptom disappear is debt with a delay timer, not a fix.
 
 1. **Reproduce first**, or get the exact repro / stack trace from the report. If it can't
    be reproduced and the report is only a symptom description, that is a blocker — record
-   it in B7 and stop, don't guess a mechanism to fit the symptom.
+   it in B8 and stop, don't guess a mechanism to fit the symptom.
 2. `get_node` on the function/component nearest the symptom.
 3. `get_neighbors` outward until you reach the actual point of divergence from spec — this
    becomes B1's `file:line` evidence, not the place the symptom was merely observed.
@@ -43,6 +43,12 @@ happens to make the symptom disappear is debt with a delay timer, not a fix.
 The fix addresses the mechanism found in B1, not the symptom. If the plan amounts to
 "add a null check / try-catch to suppress it" without B1 explaining *why* the null or
 exception occurs, stop — that's a symptom patch, not a fix, and the ticket isn't ready.
+
+---
+
+## B7
+
+Usually CHANGED (or ADDED) to pin the correct behavior the bug violated.
 
 ---
 

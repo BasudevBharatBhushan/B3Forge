@@ -24,6 +24,13 @@ deliverables, still written.)* Plan-mode output is transient: paste it into the 
 - *Part B — Technical Detail* (implementing agent): root cause with `file:line`, non-goals,
   discovery, plan, subtasks, verification. Write B first, compress into A.
 
+## B7 — behavior changes
+
+Every ticket carries B7: the rules it ADDS, CHANGES (full new text) or REMOVES, written in
+plain WHEN/THEN lines under an `**Area:**`, or exactly `None — no behavior change` (only
+`refactor` and `chore`). The developer approves B7 together with the plan; `/close-ticket`
+merges it into `ai-workspace/behavior/<area>.md`.
+
 ## Hygiene — the token budget
 
 - Resume header (~7 lines): status, scope, subtask, files — read first, body only when needed.

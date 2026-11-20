@@ -47,6 +47,12 @@ pattern where an existing one already fits.**
 
 ---
 
+## B7
+
+Usually ADDED rules for the new capability, in the area file of the module it extends.
+
+---
+
 ## Non-goals to copy into every brief
 
 - No refactor of surrounding code "to make room" — that's a separate `/refactor` ticket

@@ -117,7 +117,15 @@ said `impl-mid` would not have been tiered.*
 - [x] Every diff read by the orchestrator against its subtask's acceptance condition
 - [x] Each verified subtask committed — `T-042.1`, `T-042.2`, `T-042.3` (not pushed)
 
-## B7. Decisions & Blockers
+## B7. Behavior changes
+
+**Area:** billing
+### CHANGED Rule: Invoice list for a customer
+- WHEN a customer's invoices are listed
+- THEN each invoice includes the customer name, fetched with one batched lookup
+- AND an invoice whose customer no longer exists shows an empty name, status 200
+
+## B8. Decisions & Blockers
 
 - `findByIds` returns a `Map` rather than an array so the service does no re-sorting and
   missing customers need no special case — the key is simply absent.

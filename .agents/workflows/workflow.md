@@ -60,6 +60,8 @@ contract it depends on — not that you are unsure.
 
 ## Step 2 — Graph discovery
 
+Before planning, read `ai-workspace/behavior/<area>.md` for each affected area (the behavior book is the current contract); a ticket's B7 is merged into it at closure.
+
 Mandatory, and it happens **before** the plan is written. Setup and tool reference:
 `.agents/rules/graphify.md`.
 
@@ -112,7 +114,8 @@ max. **Part B** is the technical detail the implementing agent works from.
 | B4 Plan | The plan-mode artifact, verbatim |
 | B5 Subtasks | Table: subtask, file(s), **`subagent_type`** (`impl-small`/`impl-mid`), state (`[ ]` / `[~]` / `[x]`) |
 | B6 Verification | Test cases authored now, run later or never |
-| B7 Decisions & Blockers | Only what a future reader needs |
+| B7 Behavior changes | ADDED / CHANGED / REMOVED rules, or `None` (refactor/chore only) |
+| B8 Decisions & Blockers | Only what a future reader needs |
 
 **Write Part B first, then compress it into Part A.** Part A states each point once in plain
 language; Part B carries the evidence and does not restate it. Objective is not its own

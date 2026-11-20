@@ -85,7 +85,7 @@ where a detailed browser test plan gets written and then never runs. Be honest a
 |---|---|
 | Pure CSS/token change, no logic | **Dry run** — sanity gate plus orchestrator diff read. Record it as `Dry Run` in the table, not as a test that passed. |
 | Breakpoint-driven logic (a JS media-query hook, a conditional render) | Unit-test the hook or the predicate at the logic layer |
-| Layout genuinely unprovable functionally | Browser check — **explicit developer approval required**, with the reason recorded in §B7 Decisions & Blockers |
+| Layout genuinely unprovable functionally | Browser check — **explicit developer approval required**, with the reason recorded in §B8 Decisions & Blockers |
 
 Never write a browser scenario as a placeholder for verification you do not intend to run.
 An accurate `NOT RUN` is worth more than an implied check that never happened.

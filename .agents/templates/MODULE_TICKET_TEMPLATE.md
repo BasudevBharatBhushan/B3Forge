@@ -11,6 +11,7 @@
 **Active child:** — (0/N)
 **Children:** T-NNN.1 .. T-NNN.N — see Component Manifest (M5)
 **Blocked:** none
+<!-- Each child ticket carries its own B7 (behavior changes); the parent has none. -->
 
 <!-- RESUME HEADER ENDS HERE. Everything needed to pick this module back up is above.
      Read Part A to review the work. Read Part B only when re-deriving a decision or

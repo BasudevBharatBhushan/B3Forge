@@ -40,6 +40,12 @@ ordering, its continued behavior belongs in the plan explicitly, not as an after
 
 ---
 
+## B7
+
+Usually CHANGED rules, with the full new text; the old text is what A2 diffs against.
+
+---
+
 ## Non-goals to copy into every brief
 
 - No unrelated refactor of the touched code — separate `/refactor` ticket

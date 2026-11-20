@@ -13,13 +13,17 @@ description: Move a ticket to COMPLETED. Completion requirements, active-tickets
 - A module parent additionally requires M7 Module-Level Acceptance passing, or explicit
   closure approval without it. Children can reach `COMPLETED` individually before M7 runs.
 
-Anything unresolved stays `AWAITING_TEST` or goes `BLOCKED`, with the reason in B7 Decisions
+Anything unresolved stays `AWAITING_TEST` or goes `BLOCKED`, with the reason in B8 Decisions
 & Blockers.
 
 ## Steps
 
 1. Confirm the requirements above.
-2. <!-- PHASE 3: merge B7 into behavior book -->
+2. **Merge B7 into `ai-workspace/behavior/<area>.md`** (format: that folder's README):
+   `ADDED` → append the rule block · `CHANGED` → replace the block with that rule name ·
+   `REMOVED` → delete that block. Set each touched block's `<!-- last changed: T-NNN -->`
+   to this ticket. Missing area file → create it with `# Area: <Name>`.
+   `None — no behavior change` → nothing to merge.
 3. <!-- PHASE 4: run validate --ticket -->
 4. Refresh the graph (once per ticket).
 5. Set status `COMPLETED` in the ticket's resume header.

@@ -142,7 +142,21 @@ prompt — never pass a `model` override.
 - [ ] Every diff read by the orchestrator against its subtask's acceptance condition
 - [ ] Each verified subtask committed as `T-NNN.S — <what it achieved>` (not pushed)
 
-## B7. Decisions & Blockers
+## B7. Behavior changes
+
+<!-- Approved with the plan; merged into ai-workspace/behavior/<area>.md at close. Per rule:
+     ADDED, CHANGED (full new text) or REMOVED. Or exactly `None — no behavior change`
+     (only `refactor` and `chore`). -->
+
+**Area:** [area]
+
+### ADDED Rule: [name]
+- WHEN [condition]
+- THEN [observable result]
+### CHANGED Rule: [name]
+### REMOVED Rule: [name]
+
+## B8. Decisions & Blockers
 
 [Only what a future reader needs: a decision made, a constraint discovered, a blocker hit.
 No execution log. No narration of work already reflected in the checkboxes above.]
