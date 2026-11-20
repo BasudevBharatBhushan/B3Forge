@@ -61,6 +61,15 @@ under a comment line saying B3Forge manages them. Files that already existed in 
 (and were preserved) are not listed, and neither are your own lines. `update` keeps the list
 in sync, `--no-gitignore` removes it, and `uninstall` removes everything B3Forge added.
 
+```bash
+# New project: install and keep B3Forge files out of git
+npx github:BasudevBharatBhushan/B3Forge --gitignore
+
+# Project that already has B3Forge: turn it on (or off) during an update
+npx github:BasudevBharatBhushan/B3Forge update . --gitignore
+npx github:BasudevBharatBhushan/B3Forge update . --no-gitignore
+```
+
 Trade-offs, in plain words:
 
 - Ignored files are not shared through git, so each teammate runs the installer themselves.
