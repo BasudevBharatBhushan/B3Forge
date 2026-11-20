@@ -28,7 +28,7 @@ function loadState(target, optional = false) {
 }
 function createState(options, files = {}) {
     const pkg = (0, constants_1.packageJson)();
-    return { schemaVersion: 1, template: { package: pkg.name, version: pkg.version, installedAt: new Date().toISOString() }, target: { path: '.', platform: process.platform }, profile: options.profile, harnesses: [...options.harnesses].sort(), components: { baseWorkflow: true, graphifyMcp: options.profile !== 'minimal' && options.mcp !== false, hooks: options.profile === 'strict', review: options.profile === 'strict', securityScan: options.profile === 'strict', memory: options.profile !== 'minimal' }, files, managedConfiguration: { gitignore: { path: '.gitignore', lines: [] } } };
+    return { schemaVersion: 1, template: { package: pkg.name, version: pkg.version, installedAt: new Date().toISOString() }, target: { path: '.', platform: process.platform }, profile: options.profile, harnesses: [...options.harnesses].sort(), components: { baseWorkflow: true, graphifyMcp: options.profile !== 'minimal' && options.mcp !== false, hooks: options.profile === 'strict', review: options.profile === 'strict', securityScan: options.profile === 'strict', memory: options.profile !== 'minimal', gitignoreInstalledFiles: options.gitignore === true }, files, managedConfiguration: { gitignore: { path: '.gitignore', lines: [] } } };
 }
 function statusOf(target, relative, record) {
     const file = (0, fs_safe_1.within)(target, relative);

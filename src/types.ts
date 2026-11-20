@@ -10,6 +10,7 @@ export interface Options {
   enableHooks: boolean;
   strict: boolean;
   mcp: boolean | undefined;
+  gitignore: boolean | undefined;
   graphPath: string;
   serverName: string;
   format: string;
@@ -46,6 +47,8 @@ export interface InstallState {
     review: boolean;
     securityScan: boolean;
     memory: boolean;
+    /** Optional: absent in older state files, which means off. */
+    gitignoreInstalledFiles?: boolean;
   };
   files: Record<string, FileRecord>;
   managedConfiguration: {

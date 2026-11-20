@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { BASE, IGNORE, ROOT, STATE } from './constants';
+import { BASE, IGNORE, IGNORE_COMMENT, ROOT, STATE } from './constants';
 import { digest, json, present, safeRelative, stable, within } from './fs-safe';
 import { statusOf } from './state';
 import type { Action, FileRecord, InstallState, McpServerValue, Options } from './types';
@@ -79,8 +79,39 @@ export function mcpPlan(target: string, options: Options, current: InstallState 
   if (found === undefined || (managed && foundHash === managed.expectedValueSha256 && foundHash !== expectedHash)) return { op: 'merge-mcp', relative, name, value, expectedHash, reason: found === undefined ? 'missing-mcp-entry' : 'owned-mcp-update' };
   return managed && foundHash === managed.expectedValueSha256 ? { op: 'skip-config', relative, reason: 'mcp-current' } : { op: 'preserve-config', relative, reason: 'existing-mcp-entry-not-owned' };
 }
-export function ignorePlan(target: string, current: InstallState | null, uninstall = false): Action[] {
+/** Root-anchored, forward-slash .gitignore line for one installed file. */
+export function ignoreLineFor(relative: string): string {
+  return '/' + relative.replace(/\\/g, '/').replace(/[\\*?[\]]/g, '\\$&').replace(/ $/, '\\ ');
+}
+/**
+ * Ignore actions. `owned` lists installer-owned files whose lines should be present (empty when
+ * the per-file option is off, which retires any previously managed per-file lines and comment).
+ */
+export function ignorePlan(target: string, current: InstallState | null, uninstall = false, owned: string[] = []): Action[] {
   const relative = '.gitignore'; const file = within(target, relative); const lines = present(file) ? fs.readFileSync(file, 'utf8').split(/\r?\n/) : [];
   const tracked = current && current.managedConfiguration && current.managedConfiguration.gitignore ? current.managedConfiguration.gitignore.lines : [];
-  return (uninstall ? tracked : IGNORE.filter((line) => !lines.includes(line))).map((line): Action => uninstall ? { op: 'remove-ignore', relative, line, reason: 'owned-ignore-line' } : { op: 'add-ignore', relative, line, reason: 'missing-ignore-line' });
+  const add = (line: string): Action => ({ op: 'add-ignore', relative, line, reason: 'missing-ignore-line' });
+  const remove = (line: string, reason: string): Action => ({ op: 'remove-ignore', relative, line, reason });
+  if (uninstall) return tracked.map((line) => remove(line, 'owned-ignore-line'));
+  const actions: Action[] = IGNORE.filter((line) => !lines.includes(line)).map(add);
+  const wanted = [...new Set(owned.map(ignoreLineFor))].sort();
+  const managedFileLines = tracked.filter((line) => !IGNORE.includes(line) && line !== IGNORE_COMMENT);
+  for (const line of managedFileLines) if (!wanted.includes(line)) actions.push(remove(line, 'no-longer-owned-file'));
+  if (!wanted.length) { if (tracked.includes(IGNORE_COMMENT)) actions.push(remove(IGNORE_COMMENT, 'gitignore-option-off')); return actions; }
+  if (!lines.includes(IGNORE_COMMENT)) actions.push({ op: 'add-ignore', relative, line: IGNORE_COMMENT, reason: 'managed-comment' });
+  for (const line of wanted) if (!lines.includes(line)) actions.push({ op: 'add-ignore', relative, line, reason: 'installed-file' });
+  return actions;
+}
+
+/** Owned files already tracked by git, or [] when git is missing or target is not in a work tree. */
+export function trackedOwned(target: string, owned: string[]): string[] {
+  const git = (args: string[]) => spawnSync('git', ['--literal-pathspecs', '-C', target, ...args], { encoding: 'utf8' });
+  const inside = git(['rev-parse', '--is-inside-work-tree']);
+  if (inside.error || inside.status !== 0 || inside.stdout.trim() !== 'true') return [];
+  const found: string[] = [];
+  for (let i = 0; i < owned.length; i += 200) {
+    const r = git(['ls-files', '-z', '--', ...owned.slice(i, i + 200)]);
+    if (!r.error && r.status === 0) found.push(...r.stdout.split('\0').filter(Boolean));
+  }
+  return [...new Set(found)].sort();
 }

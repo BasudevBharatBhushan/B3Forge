@@ -6,7 +6,7 @@ const plan_1 = require("../plan");
 const state_1 = require("../state");
 function report(target, options, doctor = false) {
     const current = (0, state_1.loadState)(target);
-    const result = { version: current.template.version, profile: current.profile, unchanged: [], modified: [], missing: [], warnings: [] };
+    const result = { version: current.template.version, profile: current.profile, unchanged: [], modified: [], missing: [], warnings: [], gitignoreInstalledFiles: !!(current.components && current.components.gitignoreInstalledFiles) };
     for (const [relative, record] of Object.entries(current.files))
         result[(0, state_1.statusOf)(target, relative, record)].push(relative);
     const managedMcp = current.managedConfiguration && current.managedConfiguration.mcp;
@@ -20,7 +20,7 @@ function report(target, options, doctor = false) {
     if (options.json)
         console.log(JSON.stringify(result, null, 2));
     else {
-        console.log(`Installed version: ${result.version}\nProfile: ${result.profile}\nOwned files — unchanged: ${result.unchanged.length}, modified: ${result.modified.length}, missing: ${result.missing.length}`);
+        console.log(`Installed version: ${result.version}\nProfile: ${result.profile}\nGitignore installed files: ${result.gitignoreInstalledFiles ? 'on' : 'off'}\nOwned files — unchanged: ${result.unchanged.length}, modified: ${result.modified.length}, missing: ${result.missing.length}`);
         for (const name of result.modified)
             console.log(`WARN  customized file preserved: ${name}`);
         for (const name of result.missing)

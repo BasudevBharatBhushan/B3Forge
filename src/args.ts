@@ -3,7 +3,7 @@ import { die } from './fs-safe';
 import type { Options } from './types';
 
 export function parseArgs(argv: string[]): Options {
-  const result: Options = { command: 'install', target: null, profile: 'core', harnesses: new Set(['claude']), dryRun: false, json: false, yes: false, writeConflicts: false, enableHooks: false, strict: false, mcp: undefined, graphPath: 'graphify-out/graph.json', serverName: 'graphify', format: 'text', ticket: null, closing: false, port: 0, handoffAction: null, help: false, version: false };
+  const result: Options = { command: 'install', target: null, profile: 'core', harnesses: new Set(['claude']), dryRun: false, json: false, yes: false, writeConflicts: false, enableHooks: false, strict: false, mcp: undefined, gitignore: undefined, graphPath: 'graphify-out/graph.json', serverName: 'graphify', format: 'text', ticket: null, closing: false, port: 0, handoffAction: null, help: false, version: false };
   const positional: string[] = [];
   // `validate` reports bad usage as exit 2 (documented); other commands keep exit 1.
   const usageCode = argv.find((x) => !x.startsWith('-')) === 'validate' ? 2 : 1;
@@ -19,6 +19,8 @@ export function parseArgs(argv: string[]): Options {
     else if (arg === '--enable-hooks') result.enableHooks = true;
     else if (arg === '--strict') result.strict = true;
     else if (arg === '--no-mcp') result.mcp = false;
+    else if (arg === '--gitignore') result.gitignore = true;
+    else if (arg === '--no-gitignore') result.gitignore = false;
     else if (arg === '--no-skill') { /* compatibility flag: no global skills are installed */ }
     else if (arg === '--profile') result.profile = take();
     else if (arg === '--harness') result.harnesses = new Set(take().split(',').filter(Boolean));
@@ -53,7 +55,8 @@ Usage: agentic-init [install] [target] [options]
 
 Commands: install, status, doctor, update, repair, uninstall, adopt, scan, handoff, plan-view, validate
 Options: --dry-run --profile minimal|core|strict --harness claude,codex,cursor,copilot
-         --all-harnesses --enable-hooks --strict --no-mcp --write-conflicts --yes --json --port
+         --all-harnesses --enable-hooks --strict --no-mcp --gitignore --no-gitignore
+         --write-conflicts --yes --json --port
 
 Use update --dry-run before update. Modified and unknown files are always preserved.`);
 }

@@ -10,6 +10,8 @@ export const HARNESSES = new Set(['claude', 'codex', 'cursor', 'copilot']);
 export const BASE = ['.agents', '.agentic', 'ai-workspace', 'LESSONS.md', 'SETUP.md', 'AGENTS.md'];
 export const IGNORE = ['graphify-out/', 'temp/', 'tmp/', '.agentic/install-state.json', '.agentic/memory/', '.agentic/config.json'];
 
+export const IGNORE_COMMENT = '# B3Forge installed files (managed by b3forge; removed on uninstall)';
+
 export interface PackageJson { name: string; version: string }
 export function packageJson(): PackageJson {
   return require(path.join(ROOT, 'package.json')) as PackageJson;

@@ -21,7 +21,7 @@ export function loadState(target: string, optional = false): InstallState | null
 
 export function createState(options: Options, files: Record<string, FileRecord> = {}): InstallState {
   const pkg = packageJson();
-  return { schemaVersion: 1, template: { package: pkg.name, version: pkg.version, installedAt: new Date().toISOString() }, target: { path: '.', platform: process.platform }, profile: options.profile, harnesses: [...options.harnesses].sort(), components: { baseWorkflow: true, graphifyMcp: options.profile !== 'minimal' && options.mcp !== false, hooks: options.profile === 'strict', review: options.profile === 'strict', securityScan: options.profile === 'strict', memory: options.profile !== 'minimal' }, files, managedConfiguration: { gitignore: { path: '.gitignore', lines: [] } } };
+  return { schemaVersion: 1, template: { package: pkg.name, version: pkg.version, installedAt: new Date().toISOString() }, target: { path: '.', platform: process.platform }, profile: options.profile, harnesses: [...options.harnesses].sort(), components: { baseWorkflow: true, graphifyMcp: options.profile !== 'minimal' && options.mcp !== false, hooks: options.profile === 'strict', review: options.profile === 'strict', securityScan: options.profile === 'strict', memory: options.profile !== 'minimal', gitignoreInstalledFiles: options.gitignore === true }, files, managedConfiguration: { gitignore: { path: '.gitignore', lines: [] } } };
 }
 
 export function statusOf(target: string, relative: string, record: FileRecord): FileStatus {

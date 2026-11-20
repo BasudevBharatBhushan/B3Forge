@@ -50,7 +50,26 @@ identify customized files and preserve them.
 | `--harness <list>` | choose `claude`, `codex`, `cursor`, and/or `copilot` adapters |
 | `--all-harnesses` | install every supported adapter |
 | `--no-mcp` | skip the `.mcp.json` entry |
+| `--gitignore` | add every installed file to `.gitignore` so B3Forge files are not tracked by git; remembered for `update` |
+| `--no-gitignore` | turn that off again (removes the per-file lines B3Forge added) |
 | `--graph-path <p>` | non-default `graph.json` location |
+
+### Keeping B3Forge files out of git (optional)
+
+`--gitignore` adds one root-anchored line to `.gitignore` for every file the installer owns,
+under a comment line saying B3Forge manages them. Files that already existed in your project
+(and were preserved) are not listed, and neither are your own lines. `update` keeps the list
+in sync, `--no-gitignore` removes it, and `uninstall` removes everything B3Forge added.
+
+Trade-offs, in plain words:
+
+- Ignored files are not shared through git, so each teammate runs the installer themselves.
+- Tickets you create later in `ai-workspace/tickets/` are not covered, because only installed
+  files are listed.
+- `.gitignore` does not untrack files git already knows about. If you install first and commit,
+  the installer prints the `git rm --cached -- ...` command for you to run. It never runs it.
+- If you want to keep even the `.gitignore` change private, skip the flag and paste the same
+  lines into `.git/info/exclude` by hand.
 
 Then fill in the project configuration in the installed Claude adapter when you use Claude
 Code, and keep the shared rules in `AGENTS.md` / `.agentic/core/` as the cross-harness source.

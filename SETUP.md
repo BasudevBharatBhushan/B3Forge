@@ -22,6 +22,14 @@ Nothing existing is overwritten. If your project already has a `CLAUDE.md`, it i
 untouched and reported as project-owned. Review the generated `AGENTS.md` and selected adapter
 assets, then explicitly merge any desired workflow additions.
 
+**Optional: keep B3Forge files out of git.** Add `--gitignore` and every installed file is
+listed in `.gitignore` (remembered for `update`; `--no-gitignore` turns it off). Ignored files
+are not shared through git, so each teammate runs the installer themselves. Tickets you create
+later in `ai-workspace/tickets/` are not covered, because only installed files are listed. If
+git already tracks some installed files, the installer prints a `git rm --cached` command for
+you to run; it never runs it. To keep even the `.gitignore` change private, paste the lines
+into `.git/info/exclude` by hand instead.
+
 Prefer to copy by hand:
 
 ```bash

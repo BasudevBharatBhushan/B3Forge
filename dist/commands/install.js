@@ -20,9 +20,15 @@ function install(target, options, update = false) {
         // --no-mcp must not gain an MCP entry simply because the new CLI defaults to core.
         mcp: existing.components && existing.components.graphifyMcp ? options.mcp : false,
     } : options;
+    // The gitignore choice is persisted; a flag on update/install overrides it, otherwise it carries over.
+    const gitignore = options.gitignore !== undefined ? options.gitignore : !!(existing && existing.components && existing.components.gitignoreInstalledFiles);
+    effective.gitignore = gitignore;
     const plan = (0, plan_1.plannedFiles)(target, effective, existing);
     const current = existing || (0, state_1.createState)(effective, plan.records);
-    const actions = [...plan.actions, ...[(0, plan_1.mcpPlan)(target, effective, current), ...(0, plan_1.ignorePlan)(target, current)].flatMap((a) => a ? [a] : [])];
+    // Files owned after this run: existing records plus anything newly written (incl. the CLAUDE.agentic.md companion).
+    const owned = [...new Set([...Object.keys(plan.records), ...plan.actions.flatMap((a) => a.op === 'write' ? [a.relative] : [])])].sort();
+    const actions = [...plan.actions, ...[(0, plan_1.mcpPlan)(target, effective, current), ...(0, plan_1.ignorePlan)(target, current, false, gitignore ? owned : [])].flatMap((a) => a ? [a] : [])];
+    current.components.gitignoreInstalledFiles = gitignore;
     (0, actions_1.show)(actions, options);
     (0, actions_1.apply)(target, actions, options, current, plan.records);
     // plan.records is a shallow copy of existing.files; carry its refreshed fingerprints into the saved state.
@@ -31,6 +37,13 @@ function install(target, options, update = false) {
         current.template.version = (0, constants_1.packageJson)().version;
         current.template.installedAt = new Date().toISOString();
         (0, state_1.save)(target, current, options);
+    }
+    if (gitignore && !options.json) {
+        const tracked = (0, plan_1.trackedOwned)(target, owned);
+        if (tracked.length) {
+            const quote = (p) => /^[\w@%+=:,./-]+$/.test(p) ? p : `'${p.replace(/'/g, `'\\''`)}'`;
+            console.log(`\nNOTE: .gitignore does not untrack files already in git. ${tracked.length} installed file(s) are already tracked.\nTo stop tracking them (keeps the files on disk), run this yourself from ${target}:\n  git rm --cached -- ${tracked.map(quote).join(' ')}`);
+        }
     }
     console.log(options.dryRun ? '\nDry run — no files changed.' : '\nCompleted safely. Run `agentic-init doctor .` for diagnostics.');
 }

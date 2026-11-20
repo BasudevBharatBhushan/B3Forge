@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IGNORE = exports.BASE = exports.HARNESSES = exports.PROFILES = exports.COMMANDS = exports.STATE = exports.ROOT = void 0;
+exports.IGNORE_COMMENT = exports.IGNORE = exports.BASE = exports.HARNESSES = exports.PROFILES = exports.COMMANDS = exports.STATE = exports.ROOT = void 0;
 exports.packageJson = packageJson;
 const path = __importStar(require("node:path"));
 // Compiled modules live in dist/ (one level below the repo root), so the template root is
@@ -45,6 +45,7 @@ exports.PROFILES = new Set(['minimal', 'core', 'strict']);
 exports.HARNESSES = new Set(['claude', 'codex', 'cursor', 'copilot']);
 exports.BASE = ['.agents', '.agentic', 'ai-workspace', 'LESSONS.md', 'SETUP.md', 'AGENTS.md'];
 exports.IGNORE = ['graphify-out/', 'temp/', 'tmp/', '.agentic/install-state.json', '.agentic/memory/', '.agentic/config.json'];
+exports.IGNORE_COMMENT = '# B3Forge installed files (managed by b3forge; removed on uninstall)';
 function packageJson() {
     return require(path.join(exports.ROOT, 'package.json'));
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 2026-11-21
+
+### Added
+
+- `--gitignore` option: adds a root-anchored `.gitignore` line for every installer-owned file (never preserved pre-existing files) so B3Forge files are not tracked by git. The choice is stored in install state (`components.gitignoreInstalledFiles`) and honored by `update`; `--no-gitignore` turns it off. `uninstall` removes every line B3Forge added. If owned files are already tracked, a NOTE prints the `git rm --cached` command; it is never run for you. `status`/`doctor` report whether the option is on.
+
 ## 0.3.0 — 2026-11-20
 
 ### Added

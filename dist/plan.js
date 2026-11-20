@@ -39,7 +39,9 @@ exports.source = source;
 exports.commandExists = commandExists;
 exports.plannedFiles = plannedFiles;
 exports.mcpPlan = mcpPlan;
+exports.ignoreLineFor = ignoreLineFor;
 exports.ignorePlan = ignorePlan;
+exports.trackedOwned = trackedOwned;
 const fs = __importStar(require("node:fs"));
 const path = __importStar(require("node:path"));
 const node_child_process_1 = require("node:child_process");
@@ -165,10 +167,52 @@ function mcpPlan(target, options, current, uninstall = false) {
         return { op: 'merge-mcp', relative, name, value, expectedHash, reason: found === undefined ? 'missing-mcp-entry' : 'owned-mcp-update' };
     return managed && foundHash === managed.expectedValueSha256 ? { op: 'skip-config', relative, reason: 'mcp-current' } : { op: 'preserve-config', relative, reason: 'existing-mcp-entry-not-owned' };
 }
-function ignorePlan(target, current, uninstall = false) {
+/** Root-anchored, forward-slash .gitignore line for one installed file. */
+function ignoreLineFor(relative) {
+    return '/' + relative.replace(/\\/g, '/').replace(/[\\*?[\]]/g, '\\$&').replace(/ $/, '\\ ');
+}
+/**
+ * Ignore actions. `owned` lists installer-owned files whose lines should be present (empty when
+ * the per-file option is off, which retires any previously managed per-file lines and comment).
+ */
+function ignorePlan(target, current, uninstall = false, owned = []) {
     const relative = '.gitignore';
     const file = (0, fs_safe_1.within)(target, relative);
     const lines = (0, fs_safe_1.present)(file) ? fs.readFileSync(file, 'utf8').split(/\r?\n/) : [];
     const tracked = current && current.managedConfiguration && current.managedConfiguration.gitignore ? current.managedConfiguration.gitignore.lines : [];
-    return (uninstall ? tracked : constants_1.IGNORE.filter((line) => !lines.includes(line))).map((line) => uninstall ? { op: 'remove-ignore', relative, line, reason: 'owned-ignore-line' } : { op: 'add-ignore', relative, line, reason: 'missing-ignore-line' });
+    const add = (line) => ({ op: 'add-ignore', relative, line, reason: 'missing-ignore-line' });
+    const remove = (line, reason) => ({ op: 'remove-ignore', relative, line, reason });
+    if (uninstall)
+        return tracked.map((line) => remove(line, 'owned-ignore-line'));
+    const actions = constants_1.IGNORE.filter((line) => !lines.includes(line)).map(add);
+    const wanted = [...new Set(owned.map(ignoreLineFor))].sort();
+    const managedFileLines = tracked.filter((line) => !constants_1.IGNORE.includes(line) && line !== constants_1.IGNORE_COMMENT);
+    for (const line of managedFileLines)
+        if (!wanted.includes(line))
+            actions.push(remove(line, 'no-longer-owned-file'));
+    if (!wanted.length) {
+        if (tracked.includes(constants_1.IGNORE_COMMENT))
+            actions.push(remove(constants_1.IGNORE_COMMENT, 'gitignore-option-off'));
+        return actions;
+    }
+    if (!lines.includes(constants_1.IGNORE_COMMENT))
+        actions.push({ op: 'add-ignore', relative, line: constants_1.IGNORE_COMMENT, reason: 'managed-comment' });
+    for (const line of wanted)
+        if (!lines.includes(line))
+            actions.push({ op: 'add-ignore', relative, line, reason: 'installed-file' });
+    return actions;
+}
+/** Owned files already tracked by git, or [] when git is missing or target is not in a work tree. */
+function trackedOwned(target, owned) {
+    const git = (args) => (0, node_child_process_1.spawnSync)('git', ['--literal-pathspecs', '-C', target, ...args], { encoding: 'utf8' });
+    const inside = git(['rev-parse', '--is-inside-work-tree']);
+    if (inside.error || inside.status !== 0 || inside.stdout.trim() !== 'true')
+        return [];
+    const found = [];
+    for (let i = 0; i < owned.length; i += 200) {
+        const r = git(['ls-files', '-z', '--', ...owned.slice(i, i + 200)]);
+        if (!r.error && r.status === 0)
+            found.push(...r.stdout.split('\0').filter(Boolean));
+    }
+    return [...new Set(found)].sort();
 }
