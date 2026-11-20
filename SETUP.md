@@ -1,5 +1,7 @@
 # Setup — Adopting This Template
 
+Requires Node 22 or newer.
+
 Roughly 20 minutes, most of it the graph build.
 
 ---
@@ -9,7 +11,7 @@ Roughly 20 minutes, most of it the graph build.
 From your project root:
 
 ```bash
-npx agentic-development-template
+npx github:BasudevBharatBhushan/B3Forge
 ```
 
 This writes the shared workflow, selected harness adapters, ticket workspace, and (for the
@@ -64,8 +66,8 @@ graphify --help                    # confirm the CLI resolves
 
 The core profile writes a project-local Graphify MCP entry into `.mcp.json`. It prefers `uv`
 when available and otherwise uses the local Python command. Restart the chosen harness so it
-picks up the server, and use `agentic-init doctor .` to diagnose a missing Graphify/`uv`
-installation. Re-run `agentic-init update . --dry-run` before changing an existing setup.
+picks up the server, and use `npx github:BasudevBharatBhushan/B3Forge doctor .` to diagnose a missing Graphify/`uv`
+installation. Re-run `npx github:BasudevBharatBhushan/B3Forge update . --dry-run` before changing an existing setup.
 
 > Do **not** run `graphify claude install`. It injects its own graph-discovery section into
 > `CLAUDE.md` plus a PreToolUse hook, which duplicates §4 of the manual — two copies of one
@@ -150,6 +152,28 @@ If step 4 or 5 misbehaves, the config block in §0 is wrong. Fix it there.
 As you touch each module, add an `agents.md` at its root from
 `.agents/templates/AGENTS_MD_TEMPLATE.md`. Max 100 lines. This pays for itself the second
 time an agent has to orient in that module.
+
+---
+
+## Migrating from 0.2
+
+0.3 slims `CLAUDE.md` and moves procedures into skills. Your `CLAUDE.md` is customized (§0
+filled in), so `update` preserves it and does not replace it. To move to the new one:
+
+1. Requires Node 22 or newer.
+2. Run `npx github:BasudevBharatBhushan/B3Forge update . --write-conflicts`. Your files stay as
+   they are; the new `CLAUDE.md` is written beside yours for review.
+3. Copy your §0 table values (commands, topology, packages, scope types) into the new file,
+   then replace your `CLAUDE.md` with it.
+4. Run `npx github:BasudevBharatBhushan/B3Forge doctor .` to confirm the state is clean.
+
+Also new in 0.3:
+
+- Ticket sections are renumbered: new tickets get **B7 Behavior changes**, and the old B7
+  "Decisions & Blockers" is now **B8**. Existing tickets keep their old numbering; leave them.
+- The behavior book (`ai-workspace/behavior/`) starts empty and fills in ticket by ticket.
+  Do not backfill it up front.
+- `validate` is available to check tickets against the process.
 
 ---
 

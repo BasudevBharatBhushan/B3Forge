@@ -1,8 +1,9 @@
 {
   "name": "b3forge",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Project-local, cross-harness workflow for AI-assisted development with safe installation lifecycle management.",
   "bin": {
+    "b3forge": "bin/cli.js",
     "agentic-init": "bin/cli.js"
   },
   "scripts": {
