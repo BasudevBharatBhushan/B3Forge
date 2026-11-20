@@ -38,13 +38,14 @@ const fs = __importStar(require("node:fs"));
 const http = __importStar(require("node:http"));
 const path = __importStar(require("node:path"));
 const fs_safe_1 = require("../fs-safe");
+const parse_1 = require("../ticket/parse");
 function ticketFile(target, id) {
     if (!id)
         (0, fs_safe_1.die)('plan-view requires --ticket <ticket-id>');
     const directory = path.join(target, 'ai-workspace', 'tickets');
     if (!(0, fs_safe_1.present)(directory))
         (0, fs_safe_1.die)('ticket directory is missing');
-    const name = fs.readdirSync(directory).find((entry) => entry.startsWith(id) && entry.endsWith('.md'));
+    const name = (0, parse_1.findTicketFile)(directory, id);
     if (!name)
         (0, fs_safe_1.die)(`ticket not found: ${id}`);
     return path.join(directory, name);

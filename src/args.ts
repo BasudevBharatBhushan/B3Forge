@@ -46,8 +46,9 @@ Usage: agentic-init [install] [target] [options]
        agentic-init <status|doctor|update|repair|uninstall|adopt|scan> [target]
        agentic-init handoff <create|list|show> [target] --ticket <id>
        agentic-init plan-view [target] --ticket <id> [--port <port>]
+       agentic-init validate [target] [--ticket <id>]
 
-Commands: install, status, doctor, update, repair, uninstall, adopt, scan, handoff, plan-view
+Commands: install, status, doctor, update, repair, uninstall, adopt, scan, handoff, plan-view, validate
 Options: --dry-run --profile minimal|core|strict --harness claude,codex,cursor,copilot
          --all-harnesses --enable-hooks --strict --no-mcp --write-conflicts --yes --json --port
 

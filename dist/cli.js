@@ -48,6 +48,7 @@ const report_1 = require("./commands/report");
 const repair_1 = require("./commands/repair");
 const scan_1 = require("./commands/scan");
 const uninstall_1 = require("./commands/uninstall");
+const validate_1 = require("./commands/validate");
 function main() {
     const options = (0, args_1.parseArgs)(process.argv.slice(2));
     if (options.help)
@@ -57,7 +58,7 @@ function main() {
     const target = path.resolve(options.target || process.cwd());
     if (!(0, fs_safe_1.present)(target) || !fs.statSync(target).isDirectory())
         (0, fs_safe_1.die)(`target directory does not exist: ${target}`);
-    if (target === path.resolve(constants_1.ROOT) && options.command !== 'scan')
+    if (target === path.resolve(constants_1.ROOT) && options.command !== 'scan' && options.command !== 'validate')
         (0, fs_safe_1.die)('refusing to scaffold the template into itself');
     switch (options.command) {
         case 'install': return (0, install_1.install)(target, options);
@@ -69,6 +70,7 @@ function main() {
         case 'adopt': return (0, adopt_1.adopt)(target, options);
         case 'scan': return (0, scan_1.scan)(target, options);
         case 'plan-view': return (0, plan_view_1.planView)(target, options);
+        case 'validate': return (0, validate_1.validate)(target, options);
         default: return (0, handoff_1.handoff)(target, options);
     }
 }

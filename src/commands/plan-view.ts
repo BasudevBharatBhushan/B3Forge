@@ -3,13 +3,14 @@ import * as http from 'node:http';
 import * as path from 'node:path';
 import type { AddressInfo } from 'node:net';
 import { die, present, write } from '../fs-safe';
+import { findTicketFile } from '../ticket/parse';
 import type { Options } from '../types';
 
 function ticketFile(target: string, id: string | null): string {
   if (!id) die('plan-view requires --ticket <ticket-id>');
   const directory = path.join(target, 'ai-workspace', 'tickets');
   if (!present(directory)) die('ticket directory is missing');
-  const name = fs.readdirSync(directory).find((entry) => entry.startsWith(id) && entry.endsWith('.md'));
+  const name = findTicketFile(directory, id);
   if (!name) die(`ticket not found: ${id}`);
   return path.join(directory, name);
 }

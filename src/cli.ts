@@ -13,12 +13,13 @@ import { report } from './commands/report';
 import { repair } from './commands/repair';
 import { scan } from './commands/scan';
 import { uninstall } from './commands/uninstall';
+import { validate } from './commands/validate';
 import type { ExitError } from './types';
 
 function main(): void {
   const options = parseArgs(process.argv.slice(2)); if (options.help) return help(); if (options.version) return console.log(packageJson().version);
   const target = path.resolve(options.target || process.cwd()); if (!present(target) || !fs.statSync(target).isDirectory()) die(`target directory does not exist: ${target}`);
-  if (target === path.resolve(ROOT) && options.command !== 'scan') die('refusing to scaffold the template into itself');
+  if (target === path.resolve(ROOT) && options.command !== 'scan' && options.command !== 'validate') die('refusing to scaffold the template into itself');
   switch (options.command) {
     case 'install': return install(target, options);
     case 'update': return install(target, options, true);
@@ -29,6 +30,7 @@ function main(): void {
     case 'adopt': return adopt(target, options);
     case 'scan': return scan(target, options);
     case 'plan-view': return planView(target, options);
+    case 'validate': return validate(target, options);
     default: return handoff(target, options);
   }
 }

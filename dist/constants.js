@@ -40,7 +40,7 @@ const path = __importStar(require("node:path"));
 // the parent of this file's directory.
 exports.ROOT = path.resolve(__dirname, '..');
 exports.STATE = '.agentic/install-state.json';
-exports.COMMANDS = new Set(['install', 'status', 'doctor', 'update', 'repair', 'uninstall', 'adopt', 'scan', 'handoff', 'plan-view']);
+exports.COMMANDS = new Set(['install', 'status', 'doctor', 'update', 'repair', 'uninstall', 'adopt', 'scan', 'handoff', 'plan-view', 'validate']);
 exports.PROFILES = new Set(['minimal', 'core', 'strict']);
 exports.HARNESSES = new Set(['claude', 'codex', 'cursor', 'copilot']);
 exports.BASE = ['.agents', '.agentic', 'ai-workspace', 'LESSONS.md', 'SETUP.md', 'AGENTS.md'];

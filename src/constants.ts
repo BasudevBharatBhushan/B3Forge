@@ -4,7 +4,7 @@ import * as path from 'node:path';
 // the parent of this file's directory.
 export const ROOT = path.resolve(__dirname, '..');
 export const STATE = '.agentic/install-state.json';
-export const COMMANDS = new Set(['install', 'status', 'doctor', 'update', 'repair', 'uninstall', 'adopt', 'scan', 'handoff', 'plan-view']);
+export const COMMANDS = new Set(['install', 'status', 'doctor', 'update', 'repair', 'uninstall', 'adopt', 'scan', 'handoff', 'plan-view', 'validate']);
 export const PROFILES = new Set(['minimal', 'core', 'strict']);
 export const HARNESSES = new Set(['claude', 'codex', 'cursor', 'copilot']);
 export const BASE = ['.agents', '.agentic', 'ai-workspace', 'LESSONS.md', 'SETUP.md', 'AGENTS.md'];

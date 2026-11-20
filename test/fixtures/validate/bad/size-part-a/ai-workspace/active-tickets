@@ -1,0 +1,5 @@
+# One row per in-flight ticket.
+
+| Ticket | Path | Status | Current subtask | Claimed files |
+|--------|------|--------|-----------------|---------------|
+| — | — | no tickets in flight | — | — |

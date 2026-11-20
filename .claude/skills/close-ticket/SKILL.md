@@ -24,7 +24,9 @@ Anything unresolved stays `AWAITING_TEST` or goes `BLOCKED`, with the reason in 
    `REMOVED` → delete that block. Set each touched block's `<!-- last changed: T-NNN -->`
    to this ticket. Missing area file → create it with `# Area: <Name>`.
    `None — no behavior change` → nothing to merge.
-3. <!-- PHASE 4: run validate --ticket -->
+3. Validate: run `npx github:BasudevBharatBhushan/B3Forge validate . --ticket <id>`. Fix every
+   error it prints; do **not** set `COMPLETED` until it exits 0 (warnings are allowed, mention
+   them to the developer).
 4. Refresh the graph (once per ticket).
 5. Set status `COMPLETED` in the ticket's resume header.
 6. **Delete the ticket's row from `ai-workspace/active-tickets`** (rewrite the file whole) —
