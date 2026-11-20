@@ -9,7 +9,10 @@ const read = (relative: string): string => fs.readFileSync(path.join(root, relat
 const MAX_CLAUDE_MD_BYTES = 7168;
 
 test('CLAUDE.md stays within its byte budget', () => {
-  const bytes = fs.statSync(path.join(root, 'CLAUDE.md')).size;
+  // Measure with LF line endings: a CRLF checkout (Windows) adds one byte per line, and the
+  // budget is about the tokens a model reads, not how the file sits on one filesystem.
+  const text = fs.readFileSync(path.join(root, 'CLAUDE.md'), 'utf8').replace(/\r\n/g, '\n');
+  const bytes = Buffer.byteLength(text, 'utf8');
   assert.ok(bytes <= MAX_CLAUDE_MD_BYTES, `CLAUDE.md is ${bytes} bytes, budget ${MAX_CLAUDE_MD_BYTES}`);
 });
 
