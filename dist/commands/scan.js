@@ -39,7 +39,7 @@ const path = __importStar(require("node:path"));
 const fs_safe_1 = require("../fs-safe");
 function scan(target, options) {
     const findings = [];
-    const rules = [['AGT001', /(?:bypass|disable|ignore)\s+(?:all\s+)?(?:safety|approval|guard)/i, 'high', 'Instruction may bypass safeguards.'], ['AGT002', /(?:curl|wget|irm)\b[^\n]*\|\s*(?:sh|bash|powershell|pwsh)/i, 'high', 'Piped remote shell command.'], ['AGT003', /\b(?:rm\s+-rf|Remove-Item\s+.*-Recurse.*-Force)\b/i, 'high', 'Broad destructive command.'], ['AGT004', /-----BEGIN [A-Z ]*PRIVATE KEY-----|(?:api[_-]?key|secret|token)\s*[:=]\s*['\"]?[A-Za-z0-9_-]{16,}/i, 'critical', 'Possible literal secret.'], ['AGT005', /uses:\s+[^\s@]+@(?![a-f0-9]{40}\b)/i, 'medium', 'Unpinned GitHub Action.']];
+    const rules = [['AGT001', /(?:bypass|disable|ignore)\s+(?:all\s+)?(?:safety|approval|guard)/i, 'high', 'Instruction may bypass safeguards.'], ['AGT002', /(?:curl|wget|irm)\b[^\n]*\|\s*(?:sh|bash|powershell|pwsh)/i, 'high', 'Piped remote shell command.'], ['AGT003', /\b(?:rm\s+-rf|Remove-Item\s+.*-Recurse.*-Force)\b/i, 'high', 'Broad destructive command.'], ['AGT004', /-----BEGIN [A-Z ]*PRIVATE KEY-----|(?:api[_-]?key|secret|token)['\"]?\s*[:=]\s*['\"]?[A-Za-z0-9_-]{16,}/i, 'critical', 'Possible literal secret.'], ['AGT005', /uses:\s+[^\s@]+@(?![a-f0-9]{40}\b)/i, 'medium', 'Unpinned GitHub Action.']];
     const files = [];
     const visit = (file) => { if (!(0, fs_safe_1.present)(file))
         return; if (fs.statSync(file).isFile())
