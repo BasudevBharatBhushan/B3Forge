@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": ".agentic/hooks",
+    "rootDir": "src/hooks",
+    "sourceMap": false,
+    "declaration": false,
+    "newLine": "lf"
+  },
+  "include": ["src/hooks/*.ts"]
+}
