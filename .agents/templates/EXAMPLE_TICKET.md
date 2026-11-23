@@ -95,7 +95,7 @@ the service imports the new method.
 Two waves: subtask 1 alone, then 2 and 3 — which share a file, so they go to that file's
 single agent, not two agents in parallel. Each row went `[ ]` → `[~]` at dispatch (with
 its agent ID on the header's `Current subtask:` line) → `[x]` once the gate was green,
-the diff read, and the change committed.
+and the diff read. Nothing was committed — that is left to the developer.
 
 *Subtask 3 is `impl-small` because it is statable as "remove line 4." Subtasks 1 and 2 need
 the missing-customer invariant explained, so they are `impl-mid`. A plan where all three
@@ -115,8 +115,6 @@ said `impl-mid` would not have been tiered.*
 - [x] `TYPECHECK_CMD` clean in affected package(s)
 - [x] `LINT_CMD` clean on touched files
 - [x] Every diff read by the orchestrator against its subtask's acceptance condition
-- [x] Each verified subtask committed — `T-042.1`, `T-042.2`, `T-042.3` (not pushed)
-
 ## B7. Behavior changes
 
 **Area:** billing

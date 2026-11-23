@@ -31,7 +31,7 @@ frontmatter binds the tier; change a tier by editing that file, never by prompti
 ```
 prompt → scope + type → graph discovery → ticket (plan, subtasks, `subagent_type` each, test cases)
   → DEVELOPER APPROVAL (plan + delegation split) → subagent execution, one subtask at a time
-  → sanity gate every subtask: typecheck · lint · diff read → commit → verification → graph refresh
+  → sanity gate every subtask: typecheck · lint · diff read → verification → graph refresh
   → AWAITING_TEST → [ tests ONLY on explicit request, max 3 fix cycles ] → COMPLETED
 ```
 
@@ -50,9 +50,9 @@ prompt → scope + type → graph discovery → ticket (plan, subtasks, `subagen
 - **Tests only on explicit request** (`/testing`). Max 3 fix cycles. Never edit, weaken, skip,
   or delete an assertion to reach green.
 - **Sanity gate, every subtask:** `TYPECHECK_CMD` in the affected package · `LINT_CMD` on touched
-  files only · diff read. Then **commit** in the affected repo: `T-NNN.S — <what achieved>`,
-  that subtask's files only. Commit is local; **push needs approval.** Start from a clean tree
-  — dirty on arrival means ask.
+  files only · diff read. Changes stay **uncommitted** in the working tree.
+- **Never `git commit` or `git push`** — the developer owns both (denied in settings.json).
+  Tree changes no active ticket accounts for → ask.
 
 ## 3. Scope & Type
 
@@ -91,10 +91,9 @@ A skill that contradicts this file is wrong.
 - **Database.** Never CRUD a real database. Schema change → SQL to
   `ai-workspace/sql/NNN_description.sql`, developer reviews and runs it, then update
   `ai-workspace/docs/db-architecture.md`.
-- **Irreversible/outward.** Local reversible work proceeds. Ask first for: `git push --force`,
-  `git reset --hard`, amending pushed commits, deleting branches or files you didn't create,
-  `rm -rf`, dropping tables, anything leaving the machine (push, PR open/comment, external
-  posts). Never `--no-verify` or discard unfamiliar working-tree changes.
+- **Irreversible/outward.** Local reversible work proceeds. Never commit or push. Ask first for:
+  `git reset --hard`, `git stash`, `git checkout -- <file>`, deleting branches or files you didn't create,
+  `rm -rf`, dropping tables, anything leaving the machine (PR open/comment, external posts). Never `--no-verify` or discard unfamiliar working-tree changes.
 - **API contracts.** Document every new/changed endpoint in `ai-workspace/docs/api/`; keep
   layer order (`backend.md`).
 - **Time.** Dates involved → `.agents/rules/timezone.md` (client timezone, never server local, store UTC).

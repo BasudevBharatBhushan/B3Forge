@@ -86,5 +86,5 @@ SELF-CHECK: <typecheck/lint result, or the specific condition verified>
 ## After the return
 
 **Read the actual diff** before marking a subtask `[x]`. A subagent's claim that it did
-something is not evidence that it did. Then the sanity gate and commit (`CLAUDE.md`). If
+something is not evidence that it did. Then the sanity gate (`CLAUDE.md`) — no commit. If
 the plan is wrong, stop and revise the ticket rather than expanding scope mid-execution.

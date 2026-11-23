@@ -109,7 +109,7 @@ step maps to a line in A3 — the technical detail of that step, not a second su
 | 2 | [One change, one concern] | `path/b` | `impl-mid` | [ ] |
 
 **Done states:** `[ ]` not started · `[~]` dispatched, not yet verified · `[x]` gate
-green, diff read, committed. Set `[~]` and the header's `Current subtask:` line — with
+green, diff read (left uncommitted). Set `[~]` and the header's `Current subtask:` line — with
 the agent ID — *before* dispatching. That ID is what recovers an interrupted subtask;
 lose it and the work has to be redone.
 
@@ -140,8 +140,6 @@ prompt — never pass a `model` override.
 - [ ] `TYPECHECK_CMD` clean in affected package(s)
 - [ ] `LINT_CMD` clean on touched files
 - [ ] Every diff read by the orchestrator against its subtask's acceptance condition
-- [ ] Each verified subtask committed as `T-NNN.S — <what it achieved>` (not pushed)
-
 ## B7. Behavior changes
 
 <!-- Approved with the plan; merged into ai-workspace/behavior/<area>.md at close. Per rule:

@@ -45,7 +45,7 @@ still written.)*
   ticket's row is deleted; the ticket file is the record. Bounded by what is in flight,
   never by elapsed time
 - Subtasks have three states: `[ ]` not started, `[~]` dispatched and not yet verified,
-  `[x]` gate green and committed. `[~]` and the agent ID go on the resume header
+  `[x]` gate green and diff read (left uncommitted). `[~]` and the agent ID go on the resume header
   *before* dispatch — that ID is what recovers an interrupted subtask
 - The context window compacts automatically. Never wind a subtask down early, skip
   verification, or thin a plan to save tokens; keep the resume header true as each subtask
@@ -106,12 +106,12 @@ never writes code.
 | Types | `TYPECHECK_CMD` in the affected package |
 | Lint | `LINT_CMD`, scoped to touched files |
 | Logic | Orchestrator reads the diff against the acceptance condition |
-| Commit | `T-NNN.S — <what the subtask achieved>`, in the affected repo, that subtask's files only. Not pushed |
 
-The commit is part of the gate, not an afterthought. `/rewind` does not restore subagent
-edits and does not track bash-driven changes; since every edit here goes through a
-subagent, git is the only recovery mechanism that actually covers the work. Tickets start
-from a clean tree — a dirty one on arrival is a stop-and-ask.
+**No commits, no pushes.** Agents never run `git commit` or `git push`; both are denied in
+`.claude/settings.json`. Verified changes stay in the working tree and the developer
+commits them when and how they choose. The ticket's `[x]` rows plus `git status` / `git diff`
+are the record of what landed. Working-tree changes that no active ticket accounts for on
+arrival are a stop-and-ask.
 
 ---
 
@@ -164,7 +164,7 @@ acting, in this order:
 
 1. `ai-workspace/active-tickets` — which ticket, which subtask, what else is in flight
 2. The ticket's resume header — state and agent IDs
-3. `git log --oneline` and `git status` in the affected repo
+3. `git status` and `git diff` in the affected repo
 
 **The ticket records intent; git records what landed. Where they disagree, git wins.**
 
@@ -177,7 +177,8 @@ A `[~]` row means an agent was in flight when the session ended:
   file's current state. Never re-send a stale brief — a half-applied edit has already
   moved the line numbers, and re-running it risks applying the change twice.
 
-Once reconciled, commit or revert the stray work before dispatching anything new. Never
+Once reconciled, finish (gate + diff read) or ask the developer about the stray work before
+dispatching anything new. Never
 begin a fresh wave on top of an unreconciled tree.
 
 ---
@@ -185,10 +186,11 @@ begin a fresh wave on top of an unreconciled tree.
 ## Irreversible and outward-facing actions
 
 Local, reversible work — editing files, running the sanity gate — proceeds unasked.
-Anything hard to undo, or visible to anyone outside this machine, stops for approval:
-`git push --force`, `git reset --hard`, amending pushed commits, deleting branches or files
-the agent did not create, `rm -rf`, dropping tables, pushing, opening or commenting on a PR,
-posting to any external service.
+`git commit` and `git push` (any form) are never run by an agent — the developer owns them.
+Anything else hard to undo, or visible to anyone outside this machine, stops for approval:
+`git reset --hard`, `git stash`, `git checkout -- <file>`, deleting branches or files the
+agent did not create, `rm -rf`, dropping tables, opening or commenting on a PR, posting to
+any external service.
 
 Never route around an obstacle destructively. `--no-verify`, discarding unfamiliar
 working-tree changes, and deleting a failing test are shortcuts that hide the problem

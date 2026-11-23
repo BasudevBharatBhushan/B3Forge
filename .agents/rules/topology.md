@@ -10,8 +10,8 @@ naming directories, so they hold for single repo, monorepo (scope and gate per p
 split repos under one parent — each subdirectory its own git repo:
 
 - `cd` into the specific repo before any git command
-- commit and push within that repo only
-- **never** commit across repos from the parent
+- agents never commit or push — the developer does, per repo
+- **never** run git across repos from the parent
 - shared `ai-workspace/` lives at the parent, no nested copies
 
 **One authority.** A subdirectory's own rules/workflow doc is a *view* of `CLAUDE.md`;

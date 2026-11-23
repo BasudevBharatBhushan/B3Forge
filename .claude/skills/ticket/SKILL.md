@@ -45,8 +45,8 @@ merges it into `ai-workspace/behavior/<area>.md`.
 
 ## Three subtask states, not two
 
-`[ ]` not started · `[~]` dispatched, not yet verified · `[x]` gate green, diff read,
-committed. Write `[~]` and the resume header's `Current subtask:` line —
+`[ ]` not started · `[~]` dispatched, not yet verified · `[x]` gate green, diff read
+(left uncommitted). Write `[~]` and the resume header's `Current subtask:` line —
 `3 — dispatched (agent a7f3c2), unverified` — **before** dispatching, not after. Without it a
 dead session cannot distinguish never-started from half-done, and the agent ID that would
 have recovered the work is gone.

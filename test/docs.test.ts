@@ -37,7 +37,7 @@ test('CLAUDE.md keeps the hard-rule keywords', () => {
     'read every diff',
     'explicit request',
     'Max 3 fix cycles',
-    'push needs approval',
+    'Never `git commit` or `git push`',
     'Never CRUD a real database',
     'Never hardcode credentials',
   ];

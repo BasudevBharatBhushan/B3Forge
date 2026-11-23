@@ -33,7 +33,7 @@ Prompt
        other Types      ──▶  approve this ticket; nothing dispatches before it
   ↓ 5. Subagent Execution — one wave at a time, partitioned by file (per ticket; for a
        module, per child, unless a Deviation Check re-opens that child's approval)
-  ↓ 6. Sanity Gate — typecheck, lint, diff read, commit (every subtask, automatic)
+  ↓ 6. Sanity Gate — typecheck, lint, diff read (every subtask, automatic; no commit)
   ↓ 7. Orchestrator Verification
   ↓ 8. Graph Update (once per ticket)
   ↓ 9. AWAITING_TEST  (per ticket; for a module, per child)
@@ -212,24 +212,26 @@ Reconcile in this order, before doing anything else:
 
 1. `ai-workspace/active-tickets` — which ticket, which subtask, what else is in flight
 2. The ticket's resume header — state and agent IDs
-3. `git log --oneline` and `git status` in the affected repo
+3. `git status` and `git diff` in the affected repo
 
-**The ticket records intent; git records what landed. Where they disagree, git wins.** A
-`[x]` row has a commit behind it, so it is settled. A `[~]` row is the one to investigate.
+**The ticket records intent; the working tree records what landed. Where they disagree, the
+tree wins.** A `[x]` row passed the gate and its diff was read, so it is settled. A `[~]` row
+is the one to investigate.
 
 | Situation | Move |
 |---|---|
 | `[~]`, same session (or one reopened with `--resume`) | Message the agent by its ID. Subagent transcripts persist with the session, and a resumed subagent keeps its full history — tool calls, results, reasoning — continuing from where it stopped |
 | `[~]`, genuinely new session | The agent is unreachable. Re-read the target file, re-derive the brief from its **current** state, dispatch fresh |
-| `[~]`, edits already complete on disk | Do not re-dispatch. Run the gate, read the diff, commit, mark `[x]` |
-| Dirty tree, no `[~]` anywhere | Something landed outside the ticket. Stop and ask before continuing |
+| `[~]`, edits already complete on disk | Do not re-dispatch. Run the gate, read the diff, mark `[x]` |
+| Changes no ticket's `Files:` claim accounts for | Something landed outside the ticket. Stop and ask before continuing |
 
 **Never re-send a stale brief.** A half-applied edit has already moved the line numbers the
 brief names. `impl-small` will refuse it — its escalate rule fires when the brief's line
 numbers do not match the file — but `impl-mid` has a Write tool and can plausibly apply the
 change a second time: a duplicated import, a second copy of a helper. Re-derive first.
 
-Reconcile fully — commit or revert the stray work — before dispatching a new wave. Never
+Reconcile fully — finish the stray work through the gate, or ask the developer about it —
+before dispatching a new wave. Never
 start one on top of an unreconciled tree.
 
 ### Partitioning — the hard constraint
@@ -310,20 +312,15 @@ Automatic, every subtask, never skipped. Not testing.
 | Types | `TYPECHECK_CMD` in the affected package |
 | Lint | `LINT_CMD`, scoped to touched files |
 | Logic | Orchestrator reads the diff against the acceptance condition |
-| Commit | `T-NNN.S — <what the subtask achieved>`, affected repo, that subtask's files |
 
-No subtask is `[x]` until all four are done.
+No subtask is `[x]` until all three are done.
 
-**Why the commit is in the gate.** Claude Code's checkpoints — `/rewind`, double `Esc` —
-do not restore edits made by a subagent, and do not track files changed by bash commands.
-This workflow routes *every* edit through a subagent, so it opts out of that safety net by
-construction. Git is what is left. A per-subtask commit means the log and the checkbox
-column say the same thing, and a session that dies mid-wave leaves at most one subtask's
-work to reconstruct instead of ten.
-
-Commit locally; **do not push** — pushing is outward-facing and needs approval. Start each
-ticket from a clean tree, so nothing downstream has to guess which changes were already
-there.
+**No commits, no pushes.** Agents never run `git commit` or `git push` — both are denied in
+`.claude/settings.json`. Per-subtask commits piled up noise in the history; instead, verified
+changes stay in the working tree and the developer commits them when and how they choose.
+The ticket's checkbox column plus `git status` / `git diff` say what landed. Before starting a
+ticket, note any pre-existing working-tree changes; anything no active ticket accounts for
+is a stop-and-ask.
 
 ---
 
